@@ -28,6 +28,8 @@ class DeskState(TypedDict, total=False):
     warnings: Annotated[list[str], operator.add]
     # recall_memory
     memory: dict
+    use_web: bool                    # run web research this time (UI toggle; default from settings)
+    research: dict                   # web research: notes (verified sources), sources, dropped, debates
     # analysts (fan-out; merged by key)
     analyst_reports: Annotated[dict[str, dict], merge_dicts]
     # debate

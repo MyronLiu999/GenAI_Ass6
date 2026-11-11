@@ -147,7 +147,8 @@ def test_decision_schema_requires_two_sided_invalidation_and_memory_note():
     from pydantic import ValidationError
     from equitydesk.schemas import Decision
     base = dict(rating="HOLD", conviction=50, horizon_months=6, thesis="t", drivers=[], risks=[],
-                memory_note="No previous calls on this ticker.")
+                memory_note="No previous calls on this ticker.", key_debates=["Is growth durable?"],
+                variant_view="In line with the street.")
     with pytest.raises(ValidationError):
         Decision(**base, invalidation=["only one side"])
     with pytest.raises(ValidationError):

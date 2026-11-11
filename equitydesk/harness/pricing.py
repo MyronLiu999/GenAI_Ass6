@@ -11,9 +11,19 @@ from equitydesk.config import ROOT
 
 
 @lru_cache(maxsize=4)
-def _sheet(path: str) -> dict:
+def _raw(path: str) -> dict:
     p = Path(path)
-    return (yaml.safe_load(p.read_text(encoding="utf-8")) or {}).get("models", {}) if p.exists() else {}
+    return (yaml.safe_load(p.read_text(encoding="utf-8")) or {}) if p.exists() else {}
+
+
+def _sheet(path: str) -> dict:
+    return _raw(path).get("models", {})
+
+
+def tool_price(name: str, path: Path | None = None) -> float | None:
+    """USD per call of a hosted tool (e.g. web_search), or None when the sheet has no line for it."""
+    line = (_raw(str(path or ROOT / "pricing.yaml")).get("tools") or {}).get(name)
+    return float(line["per_call"]) if line and "per_call" in line else None
 
 
 def price_line(model: str, path: Path | None = None) -> dict | None:

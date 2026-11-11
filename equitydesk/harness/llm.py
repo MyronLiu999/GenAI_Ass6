@@ -26,7 +26,7 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, System
 from pydantic import BaseModel
 
 from equitydesk.config import ModelCfg, Settings, plausible_key
-from equitydesk.harness.pricing import cost_usd
+from equitydesk.harness.pricing import cost_usd, tool_price
 from equitydesk.harness.trace import Tracer
 
 TRANSIENT_NAMES = {"RateLimitError", "APITimeoutError", "APIConnectionError", "InternalServerError",
@@ -52,6 +52,11 @@ class Usage:
     output_tokens: int = 0
     cache_read_tokens: int = 0
     model: str = ""
+    search_calls: int = 0          # hosted web-search tool calls, priced per call
+
+
+class Unsupported(RuntimeError):
+    """The configured model or provider cannot do this (e.g. hosted web search). The caller degrades."""
 
 
 @dataclass
@@ -62,6 +67,7 @@ class Meter:
     output_tokens: int = 0
     cost_usd: float = 0.0
     calls: int = 0
+    searches: int = 0
     unpriced: set[str] = field(default_factory=set)
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
@@ -74,14 +80,16 @@ class Meter:
             self.input_tokens += u.input_tokens
             self.output_tokens += u.output_tokens
             self.calls += 1
+            self.searches += u.search_calls
             if cost is None:
                 self.unpriced.add(u.model)
             else:
                 self.cost_usd += cost
 
     def snapshot(self) -> dict:
-        return {"calls": self.calls, "input_tokens": self.input_tokens, "output_tokens": self.output_tokens,
-                "tokens": self.tokens, "cost_usd": round(self.cost_usd, 5), "unpriced": sorted(self.unpriced)}
+        return {"calls": self.calls, "searches": self.searches, "input_tokens": self.input_tokens,
+                "output_tokens": self.output_tokens, "tokens": self.tokens, "cost_usd": round(self.cost_usd, 5),
+                "unpriced": sorted(self.unpriced)}
 
 
 class Backend(Protocol):
@@ -113,6 +121,7 @@ class LangChainBackend:
             state = "is not set" if not key else f"is set but holds {len(key.strip())} characters, not a key"
             raise ConfigError(f"{env} {state}. Put the key in .env (see .env.example), or switch to the offline "
                               "demo model (provider: scripted).")
+        self._key = key
         common: dict[str, Any] = {"model": cfg.name, "max_tokens": cfg.max_tokens, "timeout": cfg.timeout_s,
                                   "max_retries": 0, "api_key": key}
         if cfg.temperature is not None:
@@ -144,6 +153,39 @@ class LangChainBackend:
         text = msg.content if isinstance(msg.content, str) else "".join(
             b.get("text", "") for b in msg.content if isinstance(b, dict))
         return text, _usage(msg, self.cfg.name)
+
+    def web_search(self, system: str, prompt: str, context_size: str = "medium") -> tuple[dict, Usage]:
+        """OpenAI's hosted web-search tool (Responses API). Returns the answer text with each cited span
+        replaced by a source marker [S<n>], and the sources the tool actually cited. Structured output is
+        deliberately not requested here: combined with search it returns no citations and invents URLs."""
+        if self.cfg.provider != "openai" or self.cfg.base_url:
+            raise Unsupported(f"hosted web search needs provider openai on api.openai.com (configured: "
+                              f"{self.cfg.provider}{' via ' + self.cfg.base_url if self.cfg.base_url else ''})")
+        import openai
+
+        from equitydesk.policy.provenance import mark_citations
+        client = openai.OpenAI(api_key=self._key, max_retries=0, timeout=self.cfg.timeout_s * 2)
+        r = client.responses.create(model=self.cfg.name, instructions=system, input=prompt,
+                                    tools=[{"type": "web_search", "search_context_size": context_size}],
+                                    max_output_tokens=max(self.cfg.max_tokens, 2500))
+        text, annotations = "", []
+        for item in r.output:
+            if item.type != "message":
+                continue
+            for part in item.content:
+                if getattr(part, "type", "") != "output_text":
+                    continue
+                offset = len(text)
+                text += part.text
+                annotations += [{"url": a.url, "title": getattr(a, "title", "") or "", "start": a.start_index + offset,
+                                 "end": a.end_index + offset}
+                                for a in (part.annotations or []) if getattr(a, "type", "") == "url_citation"]
+        marked, sources = mark_citations(text, annotations)
+        details = getattr(r.usage, "input_tokens_details", None)
+        usage = Usage(input_tokens=r.usage.input_tokens, output_tokens=r.usage.output_tokens,
+                      cache_read_tokens=int(getattr(details, "cached_tokens", 0) or 0), model=r.model,
+                      search_calls=sum(1 for o in r.output if o.type == "web_search_call"))
+        return {"text": marked, "sources": sources}, usage
 
 
 # -- the offline scripted model ----------------------------------------------------------------
@@ -178,7 +220,7 @@ class ScriptedBackend:
     @staticmethod
     def _facts(messages: list[BaseMessage]) -> list[tuple[str, str, str]]:
         text = "\n".join(m.content for m in messages if isinstance(m.content, str))
-        return [(i, l, v) for i, l, v in FACT_LINE.findall(text) if not i.startswith("N.")]
+        return [(i, l, v) for i, l, v in FACT_LINE.findall(text) if i[0] not in ("N", "W")]
 
     @staticmethod
     def _usage(messages, out: str) -> Usage:
@@ -190,23 +232,44 @@ class ScriptedBackend:
         return [{"claim": f"{label} is {value} [{fid}].", "evidence": [fid]} for fid, label, value in chosen]
 
     def structured(self, schema, messages):
-        from equitydesk.schemas import AnalystReport, DebateTurn, Decision, QAAnswer
+        from equitydesk.schemas import (AnalystReport, DebateTurn, Decision, HeadlineView, QAAnswer, ResearchNote,
+                                        ResearchNotes, SentimentReport, StreetReport)
         self._maybe_transient()
         with self._lock:
             if self.fail_schema_once:
                 self.fail_schema_once = False
                 return None, "ValidationError: field 'points' required", self._usage(messages, "{}")
         facts = self._facts(messages)
+        text = "\n".join(m.content for m in messages if isinstance(m.content, str))
         sign = 0.0
         for fid, _, v in facts:
             if fid in ("T.ret_3m", "T.rel_strength_3m"):
                 sign = 0.3 if not v.startswith("-") else -0.3
                 break
         system = messages[0].content.lower() if messages and isinstance(messages[0].content, str) else ""
-        if schema is AnalystReport:
-            obj = AnalystReport(stance="bullish" if sign > 0 else "bearish" if sign < 0 else "neutral", score=sign,
-                                confidence=60, summary=self._points(facts, 1)[0]["claim"] if facts else "No evidence.",
-                                points=self._points(facts, 3), data_gaps=[] if facts else ["no evidence supplied"])
+        if issubclass(schema, AnalystReport):
+            base = dict(stance="bullish" if sign > 0 else "bearish" if sign < 0 else "neutral", score=sign,
+                        confidence=60, summary=self._points(facts, 1)[0]["claim"] if facts else "No evidence.",
+                        points=self._points(facts, 3), data_gaps=[] if facts else ["no evidence supplied"])
+            if schema is SentimentReport:
+                ids = list(dict.fromkeys(re.findall(r"\[(N\.\d+)\]", text)))
+                base["headlines"] = [HeadlineView(id=i, relevant=True, tone="neutral", materiality="low",
+                                                  why="Offline demo triage.") for i in ids]
+            elif schema is StreetReport:
+                base.update(consensus_view="Offline demo: the street view is summarised from the A.* evidence.",
+                            street_bull=self._points(facts, 1), street_bear=self._points(facts, 1, 1),
+                            recent_changes=self._points(facts, 1, 2), key_debates=["Offline demo debate."])
+            obj = schema(**base)
+        elif schema.__name__ == "NewsTriage":
+            ids = list(dict.fromkeys(re.findall(r"\[(H\d+)\]", text)))
+            obj = schema(items=[HeadlineView(id=i, relevant=True, tone="neutral", materiality="low",
+                                             why="Offline demo triage.") for i in ids])
+        elif schema is ResearchNotes:
+            ids = list(dict.fromkeys(re.findall(r"\[(S\d+)\]", text)))
+            obj = ResearchNotes(notes=[ResearchNote(source_ids=[i], source=f"Demo Research {i}", date="2026-11-01",
+                                                    kind="sell-side note", stance="neutral", rating="Hold",
+                                                    thesis="Offline demo note.", key_points=["Demo point."])
+                                       for i in ids], debates=["Offline demo debate."])
         elif schema is DebateTurn:
             bull = "bull" in system.split("\n", 1)[0]
             pts = self._points(facts, 2, offset=0 if bull else 2)
@@ -222,7 +285,9 @@ class ScriptedBackend:
                            thesis=(drivers[0]["claim"] if drivers else "Insufficient evidence."),
                            drivers=drivers, risks=risks, catalysts=["Next earnings report"],
                            invalidation=["A close below the protective stop", "A close above 60-day resistance"],
-                           memory_note="No previous calls on this ticker and no user notes.")
+                           memory_note="No previous calls on this ticker and no user notes.",
+                           key_debates=["Offline demo: does growth justify the multiple?"],
+                           variant_view="Offline demo: in line with the street consensus.")
         elif schema is QAAnswer:
             pts = self._points(facts, 1)
             obj = QAAnswer(answer=pts[0]["claim"] if pts else "The evidence does not cover that.",
@@ -238,6 +303,17 @@ class ScriptedBackend:
         text = (f"(offline demo model) On \"{q[:80]}\": " +
                 (f"{facts[0][1]} is {facts[0][2]} [{facts[0][0]}]." if facts else "the evidence does not cover that."))
         return text, self._usage(messages, text)
+
+    def web_search(self, system: str, prompt: str, context_size: str = "medium") -> tuple[dict, Usage]:
+        self._maybe_transient()
+        text = ("Demo Securities reiterated a Hold rating on 2026-11-01 [S1]. "
+                "Sample Research argued the valuation already reflects the growth outlook [S2].")
+        sources = [{"id": "S1", "url": "https://example.com/demo-note-1", "title": "Offline demo note 1",
+                    "domain": "example.com"},
+                   {"id": "S2", "url": "https://example.com/demo-note-2", "title": "Offline demo note 2",
+                    "domain": "example.com"}]
+        return {"text": text, "sources": sources}, Usage(input_tokens=len(prompt) // 4, output_tokens=len(text) // 4,
+                                                         model="scripted", search_calls=1)
 
 
 # -- the client --------------------------------------------------------------------------------
@@ -314,6 +390,8 @@ class LLM:
             t0 = time.perf_counter()
             try:
                 result, usage = fn(backend, messages)
+            except Unsupported:
+                raise
             except Exception as e:
                 ms = round((time.perf_counter() - t0) * 1000)
                 transient = is_transient(e)
@@ -327,12 +405,15 @@ class LLM:
                                       f"({type(e).__name__}): check the API key and model name. {e}"[:600]) from e
                 raise ModelError(f"{node}: model call failed after {attempt} attempt(s): {type(e).__name__}: {e}") from e
             cost = cost_usd(usage.model or cfg.name, usage.input_tokens, usage.output_tokens, usage.cache_read_tokens)
+            if usage.search_calls and usage.model != "scripted":      # the offline model's searches are free
+                per_call = tool_price("web_search")
+                cost = None if cost is None or per_call is None else cost + usage.search_calls * per_call
             self.meter.add(usage, cost)
             ok = not (isinstance(result, tuple) and result[1])
             self.tracer.event("llm_call", node=node, role=role, model=usage.model or cfg.name, request=req,
                               attempt=attempt, ok=ok, repair=repair, ms=round((time.perf_counter() - t0) * 1000),
                               input_tokens=usage.input_tokens, output_tokens=usage.output_tokens,
-                              cache_read_tokens=usage.cache_read_tokens,
+                              cache_read_tokens=usage.cache_read_tokens, search_calls=usage.search_calls,
                               cost_usd=None if cost is None else round(cost, 6), priced=cost is not None,
                               **({} if ok else {"schema_error": result[1][:500]}))
             return result
@@ -358,6 +439,14 @@ class LLM:
     def chat(self, node: str, role: str, system: str, history: list[BaseMessage]) -> str:
         messages = [SystemMessage(system), *history]
         return self._call(node, role, lambda b, m: b.chat(m), messages)
+
+    def web_search(self, node: str, role: str, system: str, prompt: str, context_size: str = "medium") -> dict:
+        """Hosted web search, metered like any call. Raises Unsupported when the provider cannot search."""
+        backend, _ = self.backend(role)
+        if not hasattr(backend, "web_search"):
+            raise Unsupported(f"backend {backend.name} has no web search")
+        messages = [SystemMessage(system), HumanMessage(prompt)]
+        return self._call(node, role, lambda b, m: b.web_search(system, prompt, context_size), messages)
 
     @staticmethod
     def dump(obj: BaseModel) -> dict:

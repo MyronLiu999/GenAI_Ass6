@@ -15,7 +15,8 @@ from equitydesk.tools.evidence import Fact
 CITE_RE = re.compile(r"\[\s*([A-Z]\.[A-Za-z0-9_]+(?:\s*[,;]\s*[A-Z]\.[A-Za-z0-9_]+)*)\s*\]")  # [A] or [A, B]
 ID_RE = re.compile(r"[A-Z]\.[A-Za-z0-9_]+")
 # Figures resting on sell-side estimates; when S.consensus_check flags them as stale they may not drive a call.
-ESTIMATE_IDS = {"F.pe_fwd", "F.peg", "S.target_mean", "S.target_upside", "S.analyst_rec"}
+ESTIMATE_IDS = {"F.pe_fwd", "F.peg", "S.target_mean", "S.target_upside", "S.analyst_rec", "A.target_median",
+                "A.target_high", "A.target_low"}   # fresh-target facts (A.fresh_*) stay allowed
 
 
 def cite_ids(text: str) -> list[str]:
@@ -73,8 +74,10 @@ class GroundingReport:
                          "or drop them: " + "; ".join(self.ungrounded_numbers[:8]))
         if self.stale_drivers:
             lines.append("- S.consensus_check flags the sell-side targets and forward estimates as probably stale, yet "
-                         "these drivers rest on them: " + "; ".join(f'"{p[:80]}"' for p in self.stale_drivers)
-                         + ". Move them to risks or caveats, or replace them with drivers based on reported figures.")
+                         "these statements rely on them without saying so: "
+                         + "; ".join(f'"{p[:90]}"' for p in self.stale_drivers)
+                         + ". Do not use them as drivers; elsewhere, say explicitly that they may be stale, or base "
+                         "the argument on reported figures, the fresh 30-day targets or recent estimate revisions.")
         return "\n".join(lines)
 
 
@@ -95,7 +98,7 @@ def _is_label_integer(text: str, start: int, end: int, v: float) -> bool:
     return before in ("(", ",") or after[:1] in (")", ",")
 
 
-def _numbers(text: str) -> list[tuple[str, float, bool]]:
+def _numbers(text: str, all_numbers: bool = False) -> list[tuple[str, float, bool]]:
     """(raw, value, strict) for each number worth checking. strict = has a decimal, %, $ or multiple suffix;
     those are always checked. Bare integers are checked unless they are labels (see _is_label_integer)."""
     text = DATE_RE.sub(" ", CITE_RE.sub(" ", text))
@@ -111,7 +114,7 @@ def _numbers(text: str) -> list[tuple[str, float, bool]]:
         if sign in ("-", "−"):
             v = -v
         strict = bool(dollar or dec or suffix)
-        if not strict and _is_label_integer(text, m.start(), m.end(), v):
+        if not all_numbers and not strict and _is_label_integer(text, m.start(), m.end(), v):
             continue
         out.append((m.group(0).strip(), v, strict))
     return out
@@ -127,9 +130,19 @@ def _matches(v: float, candidates: list[float], rel: float, integer_claim: bool)
     return False
 
 
+def _values(facts: dict[str, Fact]) -> list[float]:
+    """Every number an agent may quote: numeric facts, plus the figures inside text facts (a research note's
+    "target $500 → $200", a broker action, a consensus check), which are quoted from their source."""
+    vals = [f.numeric for f in facts.values() if f.numeric is not None]
+    for f in facts.values():
+        if isinstance(f.value, str) and f.unit == "text":
+            vals += [v for _, v, _ in _numbers(f.value, all_numbers=True)]
+    return vals
+
+
 def check_points(points: list[dict], facts: dict[str, Fact], cfg: GroundingCfg, extra_text: str = "") -> GroundingReport:
     rep = GroundingReport()
-    values = [f.numeric for f in facts.values() if f.numeric is not None]
+    values = _values(facts)
     texts = []
     for pt in points:
         claim = (pt.get("claim") or "").strip()
@@ -154,8 +167,13 @@ def check_points(points: list[dict], facts: dict[str, Fact], cfg: GroundingCfg, 
     return rep
 
 
+POINT_LISTS = ("points", "street_bull", "street_bear", "recent_changes")   # every cited-point list a report has
+
+
 def check_analyst(report: dict, facts: dict[str, Fact], cfg: GroundingCfg) -> GroundingReport:
-    rep = check_points(report.get("points") or [], facts, cfg, extra_text=report.get("summary", ""))
+    points = [p for k in POINT_LISTS for p in report.get(k) or []]
+    extra = " ".join([report.get("summary", ""), report.get("consensus_view", ""), *(report.get("key_debates") or [])])
+    rep = check_points(points, facts, cfg, extra_text=extra)
     rep.passed = rep.passed and len(rep.ungrounded_numbers) <= cfg.max_ungrounded_numbers
     return rep
 
@@ -164,14 +182,35 @@ def check_decision(decision: dict, facts: dict[str, Fact], cfg: GroundingCfg) ->
     drivers = list(decision.get("drivers") or [])
     points = drivers + list(decision.get("risks") or [])
     extra = " ".join([decision.get("thesis", ""), decision.get("override_rationale", ""),
+                      decision.get("variant_view", ""), *(decision.get("key_debates") or []),
                       *(decision.get("invalidation") or []), *(decision.get("catalysts") or [])])
     rep = check_points(points, facts, cfg, extra_text=extra)
     if "S.consensus_check" in facts:
         rep.stale_drivers = [d.get("claim", "") for d in drivers
                              if (set(d.get("evidence") or []) | set(cite_ids(d.get("claim", "")))) & ESTIMATE_IDS]
+        # Live finding: barred from the drivers, the PM moved the same stale-estimate argument into a key
+        # debate. Anywhere in the prose, a sentence citing those estimates must carry the caveat.
+        prose = [decision.get("thesis", ""), decision.get("variant_view", ""), *(decision.get("key_debates") or [])]
+        for sentence in (x for p in prose for x in SENTENCE.split(p)):
+            if set(cite_ids(sentence)) & ESTIMATE_IDS and not CAVEAT.search(sentence):
+                rep.stale_drivers.append(sentence.strip())
     rep.passed = (rep.passed and len(rep.ungrounded_numbers) <= cfg.max_ungrounded_numbers
                   and not rep.stale_drivers)
     return rep
+
+
+SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
+CAVEAT = re.compile(r"\b(stale|lag|lags|lagging|provisional|outdated|not yet (reflect|caught)|may not (yet )?reflect|"
+                    r"before the (drop|fall|move|sell-off|rally)|unreliable|out of date|catch up)\b", re.I)
+# Boilerplate a desk head would send back. Reported as a quality warning; it never fails the check alone.
+GENERIC = re.compile(r"\b(presents a mixed (investment )?(case|picture)|mixed (investment )?(case|picture|outlook)|"
+                     r"both (opportunities|risks) and (risks|opportunities)|it remains to be seen|only time will tell|"
+                     r"warrants a cautious approach)\b", re.I)
+
+
+def generic_phrases(decision: dict) -> list[str]:
+    return sorted({m.group(0) for m in GENERIC.finditer(" ".join([decision.get("thesis", ""),
+                                                                  decision.get("variant_view", "")]))})
 
 
 def consistency_warnings(decision: dict, analyst_reports: dict[str, dict]) -> list[str]:

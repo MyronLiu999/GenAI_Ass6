@@ -1,4 +1,5 @@
-# The four analysts. `evidence` lists the evidence-id prefixes each one sees; `extra` adds single ids.
+# The five analysts. `evidence` lists the evidence-id prefixes each one sees; `extra` adds single ids;
+# `schema` names the output schema in equitydesk/schemas.py (default AnalystReport).
 fundamental:
   title: Fundamental Analyst
   evidence: [F]
@@ -24,9 +25,12 @@ technical:
     a signal that the fall will continue (and overbought likewise for the upside).
 sentiment:
   title: Sentiment & News Analyst
+  schema: SentimentReport
   evidence: [S, N]
   extra: [T.price, T.ret_1m]
   focus: |
+    Fill `headlines` with one entry for every N.* headline: is it really about this company, its tone for
+    this stock's holders, and whether it could change earnings, risk or valuation.
     Sell-side consensus and the upside to the mean price target, short interest, the timing of the next
     earnings report, and the tone and materiality of recent headlines. Separate material news (earnings,
     guidance, regulation, M&A, product) from noise; ignore headlines about other companies. Cite headlines by
@@ -41,3 +45,17 @@ risk:
     drawdown, one-day VaR, risk-adjusted return (Sharpe), and the deterministic trade plan (ATR stop, distance
     to stop, maximum position size for the user's risk budget). A bearish score here means the risk is poorly
     paid, not that the stock will fall.
+street:
+  title: Street Research Analyst
+  schema: StreetReport
+  evidence: [A, W]
+  extra: [T.price, T.ret_1m, S.target_mean, S.target_upside, S.analyst_rec, S.consensus_check]
+  focus: |
+    Distil what the sell-side and independent researchers think and how it is changing. Use the structured
+    record (A.*: rating actions by firm, target raises and cuts, the fresh 30-day median target versus the
+    all-time mean, EPS-estimate revisions, the recommendation mix now versus three months ago) and the research
+    notes found on the web (W.*: each researcher's thesis and arguments, with its source).
+    Separate fresh views from stale ones: a mean target set before a big move says little; recent actions and
+    estimate revisions say more. Attribute every street argument to its firm or author ("Baird argues ...").
+    Then score what the street's evidence implies for the stock: momentum of revisions and actions matters
+    more than the level of the consensus.

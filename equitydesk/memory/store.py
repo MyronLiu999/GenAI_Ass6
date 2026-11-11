@@ -31,6 +31,11 @@ CREATE TABLE IF NOT EXISTS notes (
     id TEXT PRIMARY KEY, ticker TEXT NOT NULL, text TEXT NOT NULL, created_at TEXT NOT NULL,
     source TEXT NOT NULL DEFAULT 'user', active INTEGER NOT NULL DEFAULT 1);
 CREATE TABLE IF NOT EXISTS profile (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS news (
+    key TEXT PRIMARY KEY, ticker TEXT NOT NULL, title TEXT NOT NULL, publisher TEXT, published TEXT, url TEXT,
+    first_seen TEXT NOT NULL, about INTEGER, flagged INTEGER, relevant INTEGER, tone TEXT, materiality TEXT,
+    why TEXT, triaged_at TEXT);
+CREATE INDEX IF NOT EXISTS ix_news_ticker ON news(ticker, first_seen);
 """
 
 DEFAULT_PROFILE: dict[str, Any] = {
@@ -152,6 +157,36 @@ class Store:
     def deactivate_note(self, note_id: str) -> None:
         with self._db() as db:
             db.execute("UPDATE notes SET active=0 WHERE id=?", (note_id,))
+
+    # -- news tracking (what was seen when, and how it was triaged) -----------------------------
+    def track_news(self, ticker: str, items: list[dict]) -> list[dict]:
+        """Record headlines; the first time a headline is seen is kept. Returns the stored rows for `items`."""
+        import hashlib
+        keys = []
+        with self._db() as db:
+            for n in items:
+                key = hashlib.sha1(f"{ticker}|{n.get('url') or n['title']}".encode()).hexdigest()[:16]
+                keys.append(key)
+                db.execute("INSERT OR IGNORE INTO news (key, ticker, title, publisher, published, url, first_seen, about,"
+                           " flagged) VALUES (?,?,?,?,?,?,?,?,?)",
+                           (key, ticker, n["title"], n.get("publisher"), n.get("published"), n.get("url"), now(),
+                            int(bool(n.get("about"))), int(bool(n.get("flagged")))))
+            rows = [dict(r) for r in db.execute(f"SELECT * FROM news WHERE key IN ({','.join('?' * len(keys))})", keys)] \
+                if keys else []
+        return rows
+
+    def list_news(self, tickers: list[str] | None = None, limit: int = 300) -> list[dict]:
+        q, args = "SELECT * FROM news", []
+        if tickers:
+            q += f" WHERE ticker IN ({','.join('?' * len(tickers))})"
+            args = list(tickers)
+        with self._db() as db:
+            return [dict(r) for r in db.execute(q + " ORDER BY published DESC, first_seen DESC LIMIT ?", (*args, limit))]
+
+    def set_news_triage(self, key: str, relevant: bool, tone: str, materiality: str, why: str) -> None:
+        with self._db() as db:
+            db.execute("UPDATE news SET relevant=?, tone=?, materiality=?, why=?, triaged_at=? WHERE key=?",
+                       (int(relevant), tone, materiality, why[:300], now(), key))
 
     # -- profile (semantic memory about the user) ------------------------------------------------
     def get_profile(self) -> dict:

@@ -8,11 +8,12 @@ import streamlit as st
 from equitydesk.policy.guards import InputError, normalize_ticker
 from equitydesk.tools import indicators as ind
 from equitydesk.tools import risk as rk
+from equitydesk.ui import components as ui
 from equitydesk.ui.common import desk
 
 d = desk()
 s = d.s
-st.title("Watchlist")
+ui.page_header("Watchlist", "Price, momentum, trend, risk and the desk's last call for every name: computed in code, no tokens.")
 st.caption("Computed in code from price history (cached); no model is called. Pick a row to send it to the desk.")
 
 profile = d.store.get_profile()

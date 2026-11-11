@@ -7,11 +7,12 @@ import plotly.express as px
 import streamlit as st
 
 from equitydesk.memory.track import summary, track_record
+from equitydesk.ui import components as ui
 from equitydesk.ui.common import desk, open_report
 
 d = desk()
 s = d.s
-st.title("Track record")
+ui.page_header("Track record", "Every past call scored against the benchmark: the desk's evaluation in production.")
 st.caption(f"Each call is scored on excess return versus {s.data.benchmark} since the day it was made. "
            f"BUY: hit if it beat the benchmark. SELL: hit if it lagged. HOLD: hit if within "
            f"±{s.grounding.hold_band_pct:g}%. Calls younger than a few days are mostly noise.")

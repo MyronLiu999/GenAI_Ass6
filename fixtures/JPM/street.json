@@ -1,0 +1,956 @@
+{
+ "actions": [
+  {
+   "date": "2026-11-02",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 400.0,
+   "prior_pt": 395.0
+  },
+  {
+   "date": "2026-10-15",
+   "firm": "Citigroup",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 350.0,
+   "prior_pt": 360.0
+  },
+  {
+   "date": "2026-10-14",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 361.0,
+   "prior_pt": 352.0
+  },
+  {
+   "date": "2026-10-14",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 425.0,
+   "prior_pt": 420.0
+  },
+  {
+   "date": "2026-10-14",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 370.0,
+   "prior_pt": 370.0
+  },
+  {
+   "date": "2026-10-14",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 377.0,
+   "prior_pt": 370.0
+  },
+  {
+   "date": "2026-10-14",
+   "firm": "Baird",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 312.0,
+   "prior_pt": 305.0
+  },
+  {
+   "date": "2026-10-05",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 395.0,
+   "prior_pt": 400.0
+  },
+  {
+   "date": "2026-09-28",
+   "firm": "HSBC",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 377.0,
+   "prior_pt": 369.0
+  },
+  {
+   "date": "2026-08-14",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 390.0,
+   "prior_pt": 375.0
+  },
+  {
+   "date": "2026-08-03",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 400.0,
+   "prior_pt": 384.0
+  },
+  {
+   "date": "2026-07-20",
+   "firm": "Citigroup",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 360.0,
+   "prior_pt": 325.0
+  },
+  {
+   "date": "2026-07-17",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 368.0,
+   "prior_pt": 360.0
+  },
+  {
+   "date": "2026-07-16",
+   "firm": "B of A Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 420.0,
+   "prior_pt": 408.0
+  },
+  {
+   "date": "2026-07-15",
+   "firm": "Baird",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 305.0,
+   "prior_pt": 295.0
+  },
+  {
+   "date": "2026-07-15",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 370.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2026-07-15",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 375.0,
+   "prior_pt": 360.0
+  },
+  {
+   "date": "2026-07-15",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 352.0,
+   "prior_pt": 344.0
+  },
+  {
+   "date": "2026-07-15",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 420.0,
+   "prior_pt": 391.0
+  },
+  {
+   "date": "2026-07-15",
+   "firm": "Keefe, Bruyette & Woods",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 384.0,
+   "prior_pt": 370.0
+  },
+  {
+   "date": "2026-07-07",
+   "firm": "B of A Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 408.0,
+   "prior_pt": 362.0
+  },
+  {
+   "date": "2026-07-07",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 384.0,
+   "prior_pt": 375.0
+  },
+  {
+   "date": "2026-07-06",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 360.0,
+   "prior_pt": 340.0
+  },
+  {
+   "date": "2026-07-06",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 360.0,
+   "prior_pt": 350.0
+  },
+  {
+   "date": "2026-06-29",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 362.0,
+   "prior_pt": 336.0
+  },
+  {
+   "date": "2026-06-26",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 344.0,
+   "prior_pt": 332.0
+  },
+  {
+   "date": "2026-04-17",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 340.0,
+   "prior_pt": 320.0
+  },
+  {
+   "date": "2026-04-15",
+   "firm": "Jefferies",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 320.0,
+   "prior_pt": 310.0
+  },
+  {
+   "date": "2026-04-15",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 332.0,
+   "prior_pt": 323.0
+  },
+  {
+   "date": "2026-04-14",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 345.0,
+   "prior_pt": 325.0
+  },
+  {
+   "date": "2026-04-06",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 320.0,
+   "prior_pt": 350.0
+  },
+  {
+   "date": "2026-03-30",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Lowers",
+   "pt": 325.0,
+   "prior_pt": 345.0
+  },
+  {
+   "date": "2026-03-26",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 323.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2026-03-26",
+   "firm": "Jefferies",
+   "to": "Hold",
+   "from": "",
+   "action": "init",
+   "pt_action": "Announces",
+   "pt": 310.0,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-02-25",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 330.0,
+   "prior_pt": 334.0
+  },
+  {
+   "date": "2026-02-17",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 350.0,
+   "prior_pt": 360.0
+  },
+  {
+   "date": "2026-01-22",
+   "firm": "Freedom Broker",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 320.0,
+   "prior_pt": 310.0
+  },
+  {
+   "date": "2026-01-14",
+   "firm": "CICC",
+   "to": "Outperform",
+   "from": "",
+   "action": "init",
+   "pt_action": "Announces",
+   "pt": 355.0,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-01-06",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 331.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2026-01-05",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 391.0,
+   "prior_pt": 342.0
+  },
+  {
+   "date": "2025-12-18",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 330.0,
+   "prior_pt": 319.0
+  },
+  {
+   "date": "2025-12-17",
+   "firm": "Keefe, Bruyette & Woods",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 363.0,
+   "prior_pt": 354.0
+  },
+  {
+   "date": "2025-11-03",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 350.0,
+   "prior_pt": 345.0
+  },
+  {
+   "date": "2025-10-23",
+   "firm": "Freedom Broker",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 310.0,
+   "prior_pt": 295.0
+  },
+  {
+   "date": "2025-10-15",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 342.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2025-10-15",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 338.0,
+   "prior_pt": 336.0
+  },
+  {
+   "date": "2025-10-07",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 350.0,
+   "prior_pt": 339.0
+  },
+  {
+   "date": "2025-09-30",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 330.0,
+   "prior_pt": 309.0
+  },
+  {
+   "date": "2025-09-29",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 336.0,
+   "prior_pt": 298.0
+  },
+  {
+   "date": "2025-09-24",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 319.0,
+   "prior_pt": 290.0
+  },
+  {
+   "date": "2025-09-24",
+   "firm": "Citigroup",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 325.0,
+   "prior_pt": 275.0
+  },
+  {
+   "date": "2025-09-16",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 345.0,
+   "prior_pt": 325.0
+  },
+  {
+   "date": "2025-07-16",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 325.0,
+   "prior_pt": 320.0
+  },
+  {
+   "date": "2025-07-16",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 298.0,
+   "prior_pt": 296.0
+  },
+  {
+   "date": "2025-07-16",
+   "firm": "Keefe, Bruyette & Woods",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 330.0,
+   "prior_pt": 327.0
+  },
+  {
+   "date": "2025-07-16",
+   "firm": "B of A Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 340.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2025-07-15",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 320.0,
+   "prior_pt": 295.0
+  },
+  {
+   "date": "2025-07-09",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 290.0,
+   "prior_pt": 280.0
+  },
+  {
+   "date": "2025-07-03",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 296.0,
+   "prior_pt": 240.0
+  },
+  {
+   "date": "2025-07-02",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 298.0,
+   "prior_pt": 280.0
+  },
+  {
+   "date": "2025-06-26",
+   "firm": "Citigroup",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 275.0,
+   "prior_pt": 250.0
+  },
+  {
+   "date": "2025-06-23",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 240.0,
+   "prior_pt": 236.0
+  },
+  {
+   "date": "2025-06-18",
+   "firm": "B of A Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 325.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2025-06-10",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 320.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2025-06-02",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 280.0,
+   "prior_pt": 270.0
+  },
+  {
+   "date": "2025-05-23",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 270.0,
+   "prior_pt": 251.0
+  },
+  {
+   "date": "2025-05-20",
+   "firm": "TD Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 315.0,
+   "prior_pt": 305.0
+  },
+  {
+   "date": "2025-05-20",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 295.0,
+   "prior_pt": 260.0
+  },
+  {
+   "date": "2025-05-20",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 285.0,
+   "prior_pt": 255.0
+  },
+  {
+   "date": "2025-05-20",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 236.0,
+   "prior_pt": 235.0
+  },
+  {
+   "date": "2025-05-20",
+   "firm": "Baird",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 235.0,
+   "prior_pt": 220.0
+  },
+  {
+   "date": "2025-04-17",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 305.0,
+   "prior_pt": 277.0
+  },
+  {
+   "date": "2025-04-14",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 251.0,
+   "prior_pt": 264.0
+  },
+  {
+   "date": "2025-04-04",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 264.0,
+   "prior_pt": 268.0
+  },
+  {
+   "date": "2025-04-02",
+   "firm": "B of A Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 284.0,
+   "prior_pt": 285.0
+  },
+  {
+   "date": "2025-04-01",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 265.0,
+   "prior_pt": 273.0
+  },
+  {
+   "date": "2025-01-16",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 287.0,
+   "prior_pt": 276.0
+  },
+  {
+   "date": "2025-01-16",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 330.0,
+   "prior_pt": 304.0
+  },
+  {
+   "date": "2025-01-16",
+   "firm": "Keefe, Bruyette & Woods",
+   "to": "Market Perform",
+   "from": "Market Perform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 264.0,
+   "prior_pt": 257.0
+  },
+  {
+   "date": "2025-01-16",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 268.0,
+   "prior_pt": 260.0
+  }
+ ],
+ "price_targets": {
+  "current": 343.75,
+  "high": 425.0,
+  "low": 312.0,
+  "mean": 373.47827,
+  "median": 372.0
+ },
+ "eps_trend": {
+  "0q": {
+   "current": 5.85966,
+   "7daysAgo": 5.90316,
+   "30daysAgo": 5.9303,
+   "60daysAgo": 5.9475,
+   "90daysAgo": 5.9475
+  },
+  "+1q": {
+   "current": 6.24327,
+   "7daysAgo": 6.24327,
+   "30daysAgo": 6.13767,
+   "60daysAgo": 6.12945,
+   "90daysAgo": 6.12945
+  },
+  "0y": {
+   "current": 23.91318,
+   "7daysAgo": 24.02101,
+   "30daysAgo": 24.04652,
+   "60daysAgo": 24.12453,
+   "90daysAgo": 24.12453
+  },
+  "+1y": {
+   "current": 25.57306,
+   "7daysAgo": 25.53124,
+   "30daysAgo": 25.02953,
+   "60daysAgo": 24.95399,
+   "90daysAgo": 24.95399
+  }
+ },
+ "eps_revisions": {
+  "0q": {
+   "upLast7days": 3.0,
+   "upLast30days": 4.0,
+   "downLast30days": 5.0,
+   "downLast7Days": 6.0
+  },
+  "+1q": {
+   "upLast7days": 2.0,
+   "upLast30days": 2.0,
+   "downLast30days": 2.0,
+   "downLast7Days": 2.0
+  },
+  "0y": {
+   "upLast7days": 2.0,
+   "upLast30days": 3.0,
+   "downLast30days": 6.0,
+   "downLast7Days": 8.0
+  },
+  "+1y": {
+   "upLast7days": 9.0,
+   "upLast30days": 9.0,
+   "downLast30days": 1.0,
+   "downLast7Days": 2.0
+  }
+ },
+ "growth": {
+  "0q": {
+   "stockTrend": 0.2656,
+   "indexTrend": 0.28959998
+  },
+  "+1q": {
+   "stockTrend": 0.0511,
+   "indexTrend": 0.2711
+  },
+  "0y": {
+   "stockTrend": 0.21200001,
+   "indexTrend": 0.33290002
+  },
+  "+1y": {
+   "stockTrend": 0.0694,
+   "indexTrend": 0.16690001
+  },
+  "LTG": {
+   "indexTrend": 0.122
+  }
+ },
+ "earnings_estimate": {
+  "0q": {
+   "avg": 5.85966,
+   "low": 5.65,
+   "high": 6.4,
+   "yearAgoEps": 4.63,
+   "numberOfAnalysts": 12.0,
+   "growth": 0.2656
+  },
+  "+1q": {
+   "avg": 6.24327,
+   "low": 6.05,
+   "high": 6.41,
+   "yearAgoEps": 5.94,
+   "numberOfAnalysts": 7.0,
+   "growth": 0.0511
+  },
+  "0y": {
+   "avg": 23.91318,
+   "low": 23.3,
+   "high": 25.54,
+   "yearAgoEps": 19.73,
+   "numberOfAnalysts": 13.0,
+   "growth": 0.21200001
+  },
+  "+1y": {
+   "avg": 25.57306,
+   "low": 24.05,
+   "high": 27.14,
+   "yearAgoEps": 23.91318,
+   "numberOfAnalysts": 15.0,
+   "growth": 0.0694
+  }
+ },
+ "recommendations": [
+  {
+   "period": "0m",
+   "strongBuy": 5,
+   "buy": 10,
+   "hold": 11,
+   "sell": 0,
+   "strongSell": 0
+  },
+  {
+   "period": "-1m",
+   "strongBuy": 5,
+   "buy": 10,
+   "hold": 11,
+   "sell": 0,
+   "strongSell": 0
+  },
+  {
+   "period": "-2m",
+   "strongBuy": 4,
+   "buy": 9,
+   "hold": 11,
+   "sell": 0,
+   "strongSell": 0
+  },
+  {
+   "period": "-3m",
+   "strongBuy": 4,
+   "buy": 9,
+   "hold": 10,
+   "sell": 0,
+   "strongSell": 1
+  }
+ ]
+}

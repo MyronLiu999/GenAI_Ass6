@@ -11,7 +11,7 @@ import yaml
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parent.parent
-ROLES = ("analyst", "debate", "pm", "qa")
+ROLES = ("analyst", "debate", "pm", "qa", "research")
 
 
 class ModelCfg(BaseModel):
@@ -57,6 +57,13 @@ class DataCfg(BaseModel):
     atr_stop_multiple: float = 2.0
 
 
+class ResearchCfg(BaseModel):
+    web_search: bool = True                  # hosted web search for research notes (OpenAI only)
+    context_size: Literal["low", "medium", "high"] = "medium"   # more context = deeper, more tokens
+    max_notes: int = Field(8, ge=1, le=20)
+    lookback_days: int = Field(60, ge=7, le=365)
+
+
 class PathsCfg(BaseModel):
     data_dir: str = "data"
 
@@ -68,6 +75,7 @@ class Settings(BaseModel):
     graph: GraphCfg = GraphCfg()
     grounding: GroundingCfg = GroundingCfg()
     data: DataCfg = DataCfg()
+    research: ResearchCfg = ResearchCfg()
     paths: PathsCfg = PathsCfg()
 
     # -- derived ---------------------------------------------------------------------------------

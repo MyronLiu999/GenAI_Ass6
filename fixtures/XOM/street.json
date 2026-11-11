@@ -1,0 +1,956 @@
+{
+ "actions": [
+  {
+   "date": "2026-11-07",
+   "firm": "Freedom Broker",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 162.0,
+   "prior_pt": 142.0
+  },
+  {
+   "date": "2026-11-04",
+   "firm": "Citigroup",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 175.0,
+   "prior_pt": 155.0
+  },
+  {
+   "date": "2026-11-04",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 193.0,
+   "prior_pt": 180.0
+  },
+  {
+   "date": "2026-11-02",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 213.0,
+   "prior_pt": 199.0
+  },
+  {
+   "date": "2026-11-02",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 187.0,
+   "prior_pt": 185.0
+  },
+  {
+   "date": "2026-11-02",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 200.0,
+   "prior_pt": 185.0
+  },
+  {
+   "date": "2026-11-02",
+   "firm": "Wells Fargo",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 189.0,
+   "prior_pt": 182.0
+  },
+  {
+   "date": "2026-10-19",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 200.0,
+   "prior_pt": 177.0
+  },
+  {
+   "date": "2026-10-15",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 185.0,
+   "prior_pt": 177.0
+  },
+  {
+   "date": "2026-10-01",
+   "firm": "Wells Fargo",
+   "to": "Equal-Weight",
+   "from": "Overweight",
+   "action": "down",
+   "pt_action": "Announces",
+   "pt": 182.0,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-09-28",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 180.0,
+   "prior_pt": 168.0
+  },
+  {
+   "date": "2026-09-03",
+   "firm": "Piper Sandler",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 185.0,
+   "prior_pt": 158.0
+  },
+  {
+   "date": "2026-08-19",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 177.0,
+   "prior_pt": 168.0
+  },
+  {
+   "date": "2026-08-17",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 177.0,
+   "prior_pt": 182.0
+  },
+  {
+   "date": "2026-08-07",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 168.0,
+   "prior_pt": 155.0
+  },
+  {
+   "date": "2026-08-04",
+   "firm": "Freedom Broker",
+   "to": "Hold",
+   "from": "Sell",
+   "action": "up",
+   "pt_action": "Raises",
+   "pt": 142.0,
+   "prior_pt": 130.0
+  },
+  {
+   "date": "2026-07-28",
+   "firm": "B of A Securities",
+   "to": "Neutral",
+   "from": "Buy",
+   "action": "down",
+   "pt_action": "Raises",
+   "pt": 158.0,
+   "prior_pt": 154.0
+  },
+  {
+   "date": "2026-07-09",
+   "firm": "Mizuho",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 170.0,
+   "prior_pt": 175.0
+  },
+  {
+   "date": "2026-07-02",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 155.0,
+   "prior_pt": 172.0
+  },
+  {
+   "date": "2026-06-29",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 168.0,
+   "prior_pt": 171.0
+  },
+  {
+   "date": "2026-06-16",
+   "firm": "B of A Securities",
+   "to": "Buy",
+   "from": "Neutral",
+   "action": "up",
+   "pt_action": "Announces",
+   "pt": 154.0,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-05-27",
+   "firm": "Mizuho",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 175.0,
+   "prior_pt": 159.0
+  },
+  {
+   "date": "2026-05-26",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 182.0,
+   "prior_pt": 163.0
+  },
+  {
+   "date": "2026-05-11",
+   "firm": "Bernstein",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 182.0,
+   "prior_pt": 195.0
+  },
+  {
+   "date": "2026-05-05",
+   "firm": "RBC Capital",
+   "to": "Sector Perform",
+   "from": "Sector Perform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 180.0,
+   "prior_pt": 180.0
+  },
+  {
+   "date": "2026-05-04",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 174.0,
+   "prior_pt": 171.0
+  },
+  {
+   "date": "2026-04-22",
+   "firm": "Scotiabank",
+   "to": "Sector Outperform",
+   "from": "Sector Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 163.0,
+   "prior_pt": 128.0
+  },
+  {
+   "date": "2026-04-21",
+   "firm": "Wolfe Research",
+   "to": "Peer Perform",
+   "from": "Outperform",
+   "action": "down",
+   "pt_action": "",
+   "pt": null,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-04-17",
+   "firm": "BNP Paribas",
+   "to": "Neutral",
+   "from": "Underperform",
+   "action": "up",
+   "pt_action": "Raises",
+   "pt": 165.0,
+   "prior_pt": 125.0
+  },
+  {
+   "date": "2026-04-17",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 171.0,
+   "prior_pt": 172.0
+  },
+  {
+   "date": "2026-04-10",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 172.0,
+   "prior_pt": 175.0
+  },
+  {
+   "date": "2026-04-09",
+   "firm": "JP Morgan",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 170.0,
+   "prior_pt": 140.0
+  },
+  {
+   "date": "2026-04-09",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 182.0,
+   "prior_pt": 186.0
+  },
+  {
+   "date": "2026-04-09",
+   "firm": "RBC Capital",
+   "to": "Sector Perform",
+   "from": "Sector Perform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 180.0,
+   "prior_pt": 160.0
+  },
+  {
+   "date": "2026-04-09",
+   "firm": "Jefferies",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 184.0,
+   "prior_pt": 178.0
+  },
+  {
+   "date": "2026-04-09",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 185.0,
+   "prior_pt": 183.0
+  },
+  {
+   "date": "2026-04-08",
+   "firm": "Wolfe Research",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 153.0,
+   "prior_pt": 158.0
+  },
+  {
+   "date": "2026-04-02",
+   "firm": "Citigroup",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 175.0,
+   "prior_pt": 150.0
+  },
+  {
+   "date": "2026-03-27",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 172.0,
+   "prior_pt": 134.0
+  },
+  {
+   "date": "2026-03-20",
+   "firm": "HSBC",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 158.0,
+   "prior_pt": 135.0
+  },
+  {
+   "date": "2026-03-17",
+   "firm": "Mizuho",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 162.0,
+   "prior_pt": 140.0
+  },
+  {
+   "date": "2026-03-16",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 163.0,
+   "prior_pt": 145.0
+  },
+  {
+   "date": "2026-03-12",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 186.0,
+   "prior_pt": 145.0
+  },
+  {
+   "date": "2026-03-02",
+   "firm": "Citigroup",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 150.0,
+   "prior_pt": 118.0
+  },
+  {
+   "date": "2026-03-02",
+   "firm": "B of A Securities",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 151.0,
+   "prior_pt": 135.0
+  },
+  {
+   "date": "2026-02-24",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 183.0,
+   "prior_pt": 156.0
+  },
+  {
+   "date": "2026-02-03",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 145.0,
+   "prior_pt": 135.0
+  },
+  {
+   "date": "2026-02-03",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 145.0,
+   "prior_pt": 140.0
+  },
+  {
+   "date": "2026-02-02",
+   "firm": "RBC Capital",
+   "to": "Sector Perform",
+   "from": "Sector Perform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 150.0,
+   "prior_pt": 145.0
+  },
+  {
+   "date": "2026-02-02",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 156.0,
+   "prior_pt": 158.0
+  },
+  {
+   "date": "2026-01-28",
+   "firm": "B of A Securities",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 135.0,
+   "prior_pt": 129.0
+  },
+  {
+   "date": "2026-01-23",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 134.0,
+   "prior_pt": 137.0
+  },
+  {
+   "date": "2026-01-21",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 140.0,
+   "prior_pt": 130.0
+  },
+  {
+   "date": "2026-01-08",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 142.0,
+   "prior_pt": 144.0
+  },
+  {
+   "date": "2026-01-06",
+   "firm": "Freedom Broker",
+   "to": "Sell",
+   "from": "Hold",
+   "action": "down",
+   "pt_action": "Maintains",
+   "pt": 123.0,
+   "prior_pt": 123.0
+  },
+  {
+   "date": "2026-01-05",
+   "firm": "Bernstein",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 137.0,
+   "prior_pt": 142.0
+  },
+  {
+   "date": "2025-12-12",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 135.0,
+   "prior_pt": 128.0
+  },
+  {
+   "date": "2025-12-12",
+   "firm": "Mizuho",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 132.0,
+   "prior_pt": 129.0
+  },
+  {
+   "date": "2025-12-11",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 158.0,
+   "prior_pt": 156.0
+  },
+  {
+   "date": "2025-12-11",
+   "firm": "B of A Securities",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 118.0,
+   "prior_pt": 119.0
+  },
+  {
+   "date": "2025-12-10",
+   "firm": "Citigroup",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 118.0,
+   "prior_pt": 115.0
+  },
+  {
+   "date": "2025-12-10",
+   "firm": "Jefferies",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 148.0,
+   "prior_pt": 146.0
+  },
+  {
+   "date": "2025-12-10",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 137.0,
+   "prior_pt": 135.0
+  },
+  {
+   "date": "2025-11-10",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 144.0,
+   "prior_pt": 141.0
+  },
+  {
+   "date": "2025-11-03",
+   "firm": "Scotiabank",
+   "to": "Sector Outperform",
+   "from": "Sector Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 155.0,
+   "prior_pt": 128.0
+  },
+  {
+   "date": "2025-10-17",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "",
+   "action": "init",
+   "pt_action": "Announces",
+   "pt": 156.0,
+   "prior_pt": null
+  },
+  {
+   "date": "2025-10-13",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 145.0,
+   "prior_pt": 143.0
+  },
+  {
+   "date": "2025-10-09",
+   "firm": "Scotiabank",
+   "to": "Sector Outperform",
+   "from": "Sector Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 128.0,
+   "prior_pt": 125.0
+  },
+  {
+   "date": "2025-10-07",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 126.0,
+   "prior_pt": 127.0
+  },
+  {
+   "date": "2025-09-15",
+   "firm": "Mizuho",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 123.0,
+   "prior_pt": 124.0
+  },
+  {
+   "date": "2025-09-10",
+   "firm": "B of A Securities",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 120.0,
+   "prior_pt": 113.0
+  },
+  {
+   "date": "2025-08-20",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 143.0,
+   "prior_pt": 130.0
+  },
+  {
+   "date": "2025-08-20",
+   "firm": "Melius Research",
+   "to": "Hold",
+   "from": "",
+   "action": "init",
+   "pt_action": "Announces",
+   "pt": 111.0,
+   "prior_pt": null
+  },
+  {
+   "date": "2025-08-18",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 145.0,
+   "prior_pt": 134.0
+  },
+  {
+   "date": "2025-08-08",
+   "firm": "Goldman Sachs",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 117.0,
+   "prior_pt": 117.0
+  },
+  {
+   "date": "2025-08-05",
+   "firm": "HSBC",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 120.0,
+   "prior_pt": 119.0
+  },
+  {
+   "date": "2025-08-04",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 135.0,
+   "prior_pt": 134.0
+  },
+  {
+   "date": "2025-08-01",
+   "firm": "JP Morgan",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 124.0,
+   "prior_pt": 125.0
+  },
+  {
+   "date": "2025-07-11",
+   "firm": "Scotiabank",
+   "to": "Sector Outperform",
+   "from": "Sector Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 125.0,
+   "prior_pt": 115.0
+  },
+  {
+   "date": "2025-07-08",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 134.0,
+   "prior_pt": 131.0
+  }
+ ],
+ "price_targets": {
+  "current": 166.13,
+  "high": 213.0,
+  "low": 160.0,
+  "mean": 185.04546,
+  "median": 186.0
+ },
+ "eps_trend": {
+  "0q": {
+   "current": 4.09009,
+   "7daysAgo": 4.12513,
+   "30daysAgo": 3.35712,
+   "60daysAgo": 3.05607,
+   "90daysAgo": 2.98159
+  },
+  "+1q": {
+   "current": 3.44079,
+   "7daysAgo": 3.37796,
+   "30daysAgo": 2.95356,
+   "60daysAgo": 2.8268,
+   "90daysAgo": 2.70188
+  },
+  "0y": {
+   "current": 13.66331,
+   "7daysAgo": 13.7153,
+   "30daysAgo": 12.4919,
+   "60daysAgo": 11.73861,
+   "90daysAgo": 11.52921
+  },
+  "+1y": {
+   "current": 12.45056,
+   "7daysAgo": 12.14747,
+   "30daysAgo": 11.45978,
+   "60daysAgo": 10.75521,
+   "90daysAgo": 10.61064
+  }
+ },
+ "eps_revisions": {
+  "0q": {
+   "upLast7days": 10.0,
+   "upLast30days": 11.0,
+   "downLast30days": 2.0,
+   "downLast7Days": 4.0
+  },
+  "+1q": {
+   "upLast7days": 11.0,
+   "upLast30days": 11.0,
+   "downLast30days": 1.0,
+   "downLast7Days": 2.0
+  },
+  "0y": {
+   "upLast7days": 1.0,
+   "upLast30days": 9.0,
+   "downLast30days": 0.0,
+   "downLast7Days": 0.0
+  },
+  "+1y": {
+   "upLast7days": 0.0,
+   "upLast30days": 13.0,
+   "downLast30days": 3.0,
+   "downLast7Days": 1.0
+  }
+ },
+ "growth": {
+  "0q": {
+   "stockTrend": 1.3919001,
+   "indexTrend": 0.28959998
+  },
+  "+1q": {
+   "stockTrend": 0.64629996,
+   "indexTrend": 0.2711
+  },
+  "0y": {
+   "stockTrend": 0.9547,
+   "indexTrend": 0.33290002
+  },
+  "+1y": {
+   "stockTrend": -0.0888,
+   "indexTrend": 0.16690001
+  },
+  "LTG": {
+   "indexTrend": 0.122
+  }
+ },
+ "earnings_estimate": {
+  "0q": {
+   "avg": 4.09009,
+   "low": 3.5,
+   "high": 4.71103,
+   "yearAgoEps": 1.71,
+   "numberOfAnalysts": 15.0,
+   "growth": 1.3919001
+  },
+  "+1q": {
+   "avg": 3.44079,
+   "low": 1.68,
+   "high": 4.34,
+   "yearAgoEps": 2.09,
+   "numberOfAnalysts": 16.0,
+   "growth": 0.64629996
+  },
+  "0y": {
+   "avg": 13.66331,
+   "low": 12.74,
+   "high": 14.54387,
+   "yearAgoEps": 6.99,
+   "numberOfAnalysts": 17.0,
+   "growth": 0.9547
+  },
+  "+1y": {
+   "avg": 12.45056,
+   "low": 8.76526,
+   "high": 16.5,
+   "yearAgoEps": 13.66331,
+   "numberOfAnalysts": 23.0,
+   "growth": -0.0888
+  }
+ },
+ "recommendations": [
+  {
+   "period": "0m",
+   "strongBuy": 3,
+   "buy": 6,
+   "hold": 17,
+   "sell": 0,
+   "strongSell": 0
+  },
+  {
+   "period": "-1m",
+   "strongBuy": 3,
+   "buy": 6,
+   "hold": 17,
+   "sell": 0,
+   "strongSell": 0
+  },
+  {
+   "period": "-2m",
+   "strongBuy": 3,
+   "buy": 7,
+   "hold": 15,
+   "sell": 0,
+   "strongSell": 0
+  },
+  {
+   "period": "-3m",
+   "strongBuy": 3,
+   "buy": 7,
+   "hold": 15,
+   "sell": 0,
+   "strongSell": 0
+  }
+ ]
+}

@@ -21,10 +21,13 @@ RATING_COLOR = {"STRONG_BUY": "green", "BUY": "green", "HOLD": "gray", "SELL": "
 STANCE_COLOR = {"bullish": "green", "neutral": "gray", "bearish": "red"}
 NODE_LABEL = {"collect_data": "Market data & evidence pack", "recall_memory": "Memory: past calls & notes",
               "fundamental": "Fundamental analyst", "technical": "Technical analyst",
-              "sentiment": "Sentiment & news analyst", "risk": "Risk manager", "bull": "Bull researcher",
+              "sentiment": "Sentiment & news analyst", "risk": "Risk manager",
+              "web_research": "Web research: searching and verifying sources", "street": "Street research analyst",
+              "bull": "Bull researcher",
               "bear": "Bear researcher", "pm": "Portfolio manager", "grounding": "Grounding check",
               "finalize": "Report & memory write"}
-ANALYST_TITLE = {"fundamental": "Fundamental", "technical": "Technical", "sentiment": "Sentiment & News", "risk": "Risk"}
+ANALYST_TITLE = {"fundamental": "Fundamental", "technical": "Technical", "sentiment": "Sentiment & News", "risk": "Risk",
+                 "street": "Street research"}
 CITE = re.compile(r"\[\s*([A-Z]\.[A-Za-z0-9_]+(?:\s*[,;]\s*[A-Z]\.[A-Za-z0-9_]+)*)\s*\]")
 
 

@@ -63,14 +63,16 @@ class Desk:
         return {"configurable": {"thread_id": run_id}, "recursion_limit": RECURSION_LIMIT}
 
     # -- lifecycle -----------------------------------------------------------------------------
-    def start(self, ticker: str, debate_rounds: int | None = None, language: str | None = None) -> str:
+    def start(self, ticker: str, debate_rounds: int | None = None, language: str | None = None,
+              web_research: bool | None = None) -> str:
         """Validate and register a run. Raises InputError before anything is fetched or called."""
         t = normalize_ticker(ticker)
         rounds = self.s.clamp_rounds(debate_rounds)
         run_id = new_run_id(t)
         self._pending[run_id] = {"run_id": run_id, "ticker": t, "debate_rounds": rounds,
                          "language": language or self.s.graph.language, "profile": self.store.get_profile(),
-                         "round": 0, "revisions": 0}
+                         "round": 0, "revisions": 0,
+                         "use_web": self.s.research.web_search if web_research is None else bool(web_research)}
         self.store.start_run(run_id, t, self.s.model_for("pm").name, rounds, self.provider.name)
         return run_id
 
@@ -122,9 +124,10 @@ class Desk:
         return {"type": "error", "kind": status, "run_id": run_id, "error": msg, "usage": m.snapshot(),
                 "resumable": True}
 
-    def analyze(self, ticker: str, debate_rounds: int | None = None, language: str | None = None) -> dict:
+    def analyze(self, ticker: str, debate_rounds: int | None = None, language: str | None = None,
+                web_research: bool | None = None) -> dict:
         """Run to completion and return the report; raises RuntimeError if the run fails."""
-        run_id = self.start(ticker, debate_rounds, language)
+        run_id = self.start(ticker, debate_rounds, language, web_research)
         last = None
         for ev in self.stream(run_id):
             last = ev
@@ -148,12 +151,13 @@ def _main(argv: list[str]) -> int:
     ap.add_argument("--language", choices=["English", "Chinese"], default=None)
     ap.add_argument("--offline", action="store_true", help="scripted model + recorded fixtures (free)")
     ap.add_argument("--resume", metavar="RUN_ID")
+    ap.add_argument("--no-web", action="store_true", help="skip web research (structured sell-side data only)")
     ap.add_argument("--out", help="write the Markdown report here")
     a = ap.parse_args(argv)
     overrides = {"model": {"provider": "scripted", "name": "scripted"}, "data": {"provider": "fixtures"}} if a.offline else {}
     desk = Desk(load_settings(overrides=overrides))
     try:
-        run_id = a.resume or desk.start(a.ticker or "", a.rounds, a.language)
+        run_id = a.resume or desk.start(a.ticker or "", a.rounds, a.language, False if a.no_web else None)
     except InputError as e:
         print(f"refused: {e}")
         return 2

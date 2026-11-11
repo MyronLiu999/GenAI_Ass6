@@ -26,12 +26,12 @@ def gbm(seed: int, n: int, start: float, drift: float, vol: float) -> pd.DataFra
 
 
 def write(root: Path, ticker: str, hist: pd.DataFrame, info: dict, news: list, income: dict | None = None,
-          cashflow: dict | None = None, calendar: dict | None = None) -> None:
+          cashflow: dict | None = None, calendar: dict | None = None, street: dict | None = None) -> None:
     d = root / ticker
     d.mkdir(parents=True, exist_ok=True)
     hist.round(4).to_csv(d / "history.csv")
     for name, obj in (("info", info), ("news", news), ("income", income or {}), ("cashflow", cashflow or {}),
-                      ("calendar", calendar or {})):
+                      ("calendar", calendar or {}), ("street", street or {})):
         (d / f"{name}.json").write_text(json.dumps(obj, indent=1), encoding="utf-8")
 
 
@@ -64,7 +64,28 @@ def main(out: Path) -> None:
         {"title": "Demo Robotics announces $2B buyback", "publisher": "MarketWatch", "published": "2026-10-28",
          "url": "https://example.com/4", "summary": ""},
     ]
-    write(out, "DEMO", demo, info, news, income, cashflow, {"next_earnings": "2027-02-10"})
+    day = lambda n: (pd.Timestamp.today().normalize() - pd.Timedelta(days=n)).date().isoformat()  # noqa: E731
+    street = {
+        "actions": [
+            {"date": day(2), "firm": "Alpha Securities", "to": "Neutral", "from": "Buy", "action": "down",
+             "pt_action": "Lowers", "pt": round(price * 1.02), "prior_pt": round(price * 1.30)},
+            {"date": day(9), "firm": "Beta Capital", "to": "Buy", "from": "Buy", "action": "main",
+             "pt_action": "Raises", "pt": round(price * 1.25), "prior_pt": round(price * 1.15)},
+            {"date": day(20), "firm": "Gamma Research", "to": "Outperform", "from": "Outperform", "action": "reit",
+             "pt_action": "Maintains", "pt": round(price * 1.18), "prior_pt": round(price * 1.18)},
+            {"date": day(120), "firm": "Delta Partners", "to": "Buy", "from": "", "action": "init",
+             "pt_action": "Announces", "pt": round(price * 1.40), "prior_pt": None},
+        ],
+        "price_targets": {"current": price, "high": round(price * 1.4, 2), "low": round(price * 0.9, 2),
+                          "mean": round(price * 1.12, 2), "median": round(price * 1.15, 2)},
+        "eps_trend": {"0y": {"current": 4.0, "30daysAgo": 3.95, "90daysAgo": 3.8},
+                      "+1y": {"current": 4.6, "30daysAgo": 4.5, "90daysAgo": 4.3}},
+        "eps_revisions": {"+1y": {"upLast30days": 5, "downLast30days": 1}},
+        "growth": {"0y": {"stockTrend": 0.17}, "+1y": {"stockTrend": 0.15}},
+        "recommendations": [{"period": "0m", "strongBuy": 6, "buy": 12, "hold": 5, "sell": 1, "strongSell": 0},
+                            {"period": "-3m", "strongBuy": 7, "buy": 13, "hold": 3, "sell": 1, "strongSell": 0}],
+    }
+    write(out, "DEMO", demo, info, news, income, cashflow, {"next_earnings": "2027-02-10"}, street)
     write(out, "FLAT", gbm(3, 40, 20.0, 0.0, 0.2), {"longName": "Thin History Inc.", "quoteType": "EQUITY"}, [])
     print(f"wrote DEMO, FLAT, SPY fixtures under {out}")
 

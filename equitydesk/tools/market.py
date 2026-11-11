@@ -38,6 +38,7 @@ class MarketBundle:
     cashflow: dict = field(default_factory=dict)
     news: list[dict] = field(default_factory=list)  # {title, publisher, published, url, summary}
     calendar: dict = field(default_factory=dict)    # {next_earnings: YYYY-MM-DD}
+    street: dict = field(default_factory=dict)      # sell-side research data, see normalize_street
     errors: dict[str, str] = field(default_factory=dict)
     source: str = "yfinance"
 
@@ -117,6 +118,63 @@ def normalize_calendar(cal: Any) -> dict:
     return {}
 
 
+ACTION_LABEL = {"up": "upgrade", "down": "downgrade", "init": "initiation", "main": "maintains",
+                "reit": "reiterates"}
+
+
+def _frame_to_nested(df: pd.DataFrame | None) -> dict:
+    """{row: {column: value}} with numeric values only (JSON-safe)."""
+    if df is None or getattr(df, "empty", True):
+        return {}
+    out: dict[str, dict[str, float]] = {}
+    for idx, row in df.iterrows():
+        vals = {str(c): float(v) for c, v in row.items() if isinstance(v, (int, float)) and pd.notna(v)}
+        if vals:
+            out[str(idx)] = vals
+    return out
+
+
+def normalize_street(tk: Any) -> dict:
+    """Sell-side research from Yahoo: dated rating and price-target actions by firm, the target range,
+    the EPS estimate trend and revision counts, growth estimates, and the recommendation mix over time.
+    Each part is read on its own; a missing part is simply absent."""
+    out: dict[str, Any] = {}
+    try:
+        ud = tk.upgrades_downgrades
+        if ud is not None and not ud.empty:
+            ud = ud.sort_index(ascending=False).head(80)
+            out["actions"] = [{
+                "date": str(ts)[:10], "firm": str(r.get("Firm") or ""), "to": str(r.get("ToGrade") or ""),
+                "from": str(r.get("FromGrade") or ""), "action": str(r.get("Action") or ""),
+                "pt_action": str(r.get("priceTargetAction") or ""),
+                "pt": float(r["currentPriceTarget"]) if pd.notna(r.get("currentPriceTarget")) and r.get("currentPriceTarget") else None,
+                "prior_pt": float(r["priorPriceTarget"]) if pd.notna(r.get("priorPriceTarget")) and r.get("priorPriceTarget") else None,
+            } for ts, r in ud.iterrows()]
+    except Exception:
+        pass
+    try:
+        pt = tk.analyst_price_targets or {}
+        out["price_targets"] = {k: float(v) for k, v in pt.items() if isinstance(v, (int, float)) and pd.notna(v)}
+    except Exception:
+        pass
+    for key, attr in (("eps_trend", "eps_trend"), ("eps_revisions", "eps_revisions"), ("growth", "growth_estimates"),
+                      ("earnings_estimate", "earnings_estimate")):
+        try:
+            nested = _frame_to_nested(getattr(tk, attr))
+            if nested:
+                out[key] = nested
+        except Exception:
+            pass
+    try:
+        rec = tk.recommendations
+        if rec is not None and not rec.empty:
+            out["recommendations"] = [{k: (str(v) if k == "period" else int(v)) for k, v in r.items()}
+                                      for r in rec.to_dict("records")]
+    except Exception:
+        pass
+    return out
+
+
 def _jsonable_info(info: dict) -> dict:
     return {k: v for k, v in (info or {}).items() if isinstance(v, (str, int, float, bool)) or v is None}
 
@@ -186,6 +244,21 @@ class YFinanceProvider:
                             lambda: clean_history(yf.Ticker(ticker).history(period=period, auto_adjust=True)),
                             on_call, "price_history", ticker)
 
+    def news(self, ticker: str, limit: int = 20) -> list[dict]:
+        import yfinance as yf
+        return self._cached(f"news:{ticker}:{date.today().isoformat()}:{time.strftime('%H')}:{limit}",
+                            lambda: normalize_news(yf.Ticker(ticker).news, limit), None, "news", ticker)
+
+    def street(self, ticker: str) -> dict:
+        import yfinance as yf
+        return self._cached(f"street:{ticker}:{date.today().isoformat()}:{time.strftime('%H')}",
+                            lambda: normalize_street(yf.Ticker(ticker)), None, "sell_side_research", ticker)
+
+    def info(self, ticker: str) -> dict:
+        import yfinance as yf
+        return self._cached(f"info:{ticker}:{date.today().isoformat()}", lambda: _jsonable_info(yf.Ticker(ticker).info),
+                            None, "company_info", ticker)
+
     def fetch(self, ticker: str, on_call: ToolHook | None = None) -> MarketBundle:
         import yfinance as yf
         day = date.today().isoformat()
@@ -204,6 +277,8 @@ class YFinanceProvider:
                                          lambda: normalize_news(tk.news, limit), on_call, "news", ticker),
             "calendar": lambda: self._cached(f"cal:{ticker}:{day}", lambda: normalize_calendar(tk.calendar),
                                              on_call, "earnings_calendar", ticker),
+            "street": lambda: self._cached(f"street:{ticker}:{day}:{time.strftime('%H')}", lambda: normalize_street(tk),
+                                           on_call, "sell_side_research", ticker),
         }
         results: dict[str, Any] = {}
         errors: dict[str, str] = {}
@@ -220,7 +295,8 @@ class YFinanceProvider:
             benchmark=results.get("benchmark", clean_history(None)),
             info=results.get("info") or {}, income=results.get("income") or {},
             cashflow=results.get("cashflow") or {}, news=results.get("news") or [],
-            calendar=results.get("calendar") or {}, errors=errors, source="yfinance")
+            calendar=results.get("calendar") or {}, street=results.get("street") or {}, errors=errors,
+            source="yfinance")
 
 
 class FixtureProvider:
@@ -249,6 +325,15 @@ class FixtureProvider:
             on_call(tool="price_history", ticker=ticker, ok=True, cached=True, ms=0)
         return clean_history(df)
 
+    def news(self, ticker: str, limit: int = 20) -> list[dict]:
+        return self._json(ticker, "news", [])[:limit]
+
+    def street(self, ticker: str) -> dict:
+        return self._json(ticker, "street", {})
+
+    def info(self, ticker: str) -> dict:
+        return self._json(ticker, "info", {})
+
     def _json(self, ticker: str, name: str, default: Any) -> Any:
         p = self._dir(ticker) / f"{name}.json"
         return json.loads(p.read_text(encoding="utf-8")) if p.exists() else default
@@ -260,14 +345,14 @@ class FixtureProvider:
             errors["history"] = f"no fixture for {ticker}"
         bench = self.history(self.s.data.benchmark, on_call=on_call)
         parts = {n: self._json(ticker, n, {} if n != "news" else []) for n in
-                 ("info", "income", "cashflow", "news", "calendar")}
+                 ("info", "income", "cashflow", "news", "calendar", "street")}
         for n in parts:
             if on_call:
                 on_call(tool=n, ticker=ticker, ok=True, cached=True, ms=0)
         return MarketBundle(ticker=ticker, history=hist, benchmark=bench, info=parts["info"],
                             income=parts["income"], cashflow=parts["cashflow"],
                             news=parts["news"][: self.s.data.news_limit], calendar=parts["calendar"],
-                            errors=errors, source="fixtures")
+                            street=parts["street"], errors=errors, source="fixtures")
 
 
 def make_provider(settings: Settings) -> Provider:
@@ -279,7 +364,7 @@ def snapshot(bundle: MarketBundle, root: Path, benchmark: str) -> Path:
     d = root / bundle.ticker.upper()
     d.mkdir(parents=True, exist_ok=True)
     bundle.history.to_csv(d / "history.csv")
-    for name in ("info", "income", "cashflow", "news", "calendar"):
+    for name in ("info", "income", "cashflow", "news", "calendar", "street"):
         (d / f"{name}.json").write_text(json.dumps(getattr(bundle, name), indent=1, default=str), encoding="utf-8")
     bd = root / benchmark.upper()
     bd.mkdir(parents=True, exist_ok=True)

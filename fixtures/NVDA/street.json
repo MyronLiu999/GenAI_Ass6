@@ -1,0 +1,956 @@
+{
+ "actions": [
+  {
+   "date": "2026-11-11",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-11-11",
+   "firm": "Baird",
+   "to": "Neutral",
+   "from": "Outperform",
+   "action": "down",
+   "pt_action": "Lowers",
+   "pt": 200.0,
+   "prior_pt": 500.0
+  },
+  {
+   "date": "2026-11-10",
+   "firm": "Citigroup",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 285.0,
+   "prior_pt": 315.0
+  },
+  {
+   "date": "2026-11-10",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 300.0,
+   "prior_pt": 315.0
+  },
+  {
+   "date": "2026-11-09",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 330.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2026-11-09",
+   "firm": "Goldman Sachs",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-11-02",
+   "firm": "Melius Research",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 315.0,
+   "prior_pt": 420.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "Needham",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-10-01",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 350.0,
+   "prior_pt": 350.0
+  },
+  {
+   "date": "2026-09-29",
+   "firm": "Rosenblatt",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 390.0,
+   "prior_pt": 390.0
+  },
+  {
+   "date": "2026-09-10",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "",
+   "action": "init",
+   "pt_action": "Announces",
+   "pt": 300.0,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-09-04",
+   "firm": "Rosenblatt",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 390.0,
+   "prior_pt": 390.0
+  },
+  {
+   "date": "2026-09-04",
+   "firm": "Needham",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Citigroup",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 315.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Mizuho",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 315.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "JP Morgan",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 320.0,
+   "prior_pt": 280.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Bernstein",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 400.0,
+   "prior_pt": 315.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 330.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 300.0,
+   "prior_pt": 280.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Oppenheimer",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 315.0,
+   "prior_pt": 265.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Rosenblatt",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 390.0,
+   "prior_pt": 325.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 300.0,
+   "prior_pt": 288.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Wedbush",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 345.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "DA Davidson",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Benchmark",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 335.0,
+   "prior_pt": 335.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Truist Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 346.0,
+   "prior_pt": 307.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 465.0,
+   "prior_pt": 413.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Keybanc",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 330.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 350.0,
+   "prior_pt": 350.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Needham",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 300.0,
+   "prior_pt": 270.0
+  },
+  {
+   "date": "2026-08-27",
+   "firm": "Raymond James",
+   "to": "Strong Buy",
+   "from": "Strong Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 515.0,
+   "prior_pt": 352.0
+  },
+  {
+   "date": "2026-08-25",
+   "firm": "Raymond James",
+   "to": "Strong Buy",
+   "from": "Strong Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 352.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2026-08-24",
+   "firm": "Rosenblatt",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 325.0,
+   "prior_pt": 325.0
+  },
+  {
+   "date": "2026-08-24",
+   "firm": "Keybanc",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 330.0,
+   "prior_pt": 330.0
+  },
+  {
+   "date": "2026-08-24",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 350.0,
+   "prior_pt": 350.0
+  },
+  {
+   "date": "2026-08-21",
+   "firm": "BMO Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "init",
+   "pt_action": "Announces",
+   "pt": 340.0,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-08-20",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-08-11",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 315.0,
+   "prior_pt": 315.0
+  },
+  {
+   "date": "2026-07-14",
+   "firm": "Keybanc",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 330.0,
+   "prior_pt": 310.0
+  },
+  {
+   "date": "2026-06-05",
+   "firm": "China Renaissance",
+   "to": "Buy",
+   "from": "",
+   "action": "init",
+   "pt_action": "Announces",
+   "pt": 319.0,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-06-02",
+   "firm": "Needham",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 270.0,
+   "prior_pt": 270.0
+  },
+  {
+   "date": "2026-06-01",
+   "firm": "DA Davidson",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-05-27",
+   "firm": "Tigress Financial",
+   "to": "Strong Buy",
+   "from": "Strong Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 425.0,
+   "prior_pt": 360.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 280.0,
+   "prior_pt": 275.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Evercore ISI Group",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 413.0,
+   "prior_pt": 352.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "DA Davidson",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Truist Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Raises",
+   "pt": 307.0,
+   "prior_pt": 287.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 270.0,
+   "prior_pt": 250.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 350.0,
+   "prior_pt": 350.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Wedbush",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 330.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Stifel",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 282.0,
+   "prior_pt": 250.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "JP Morgan",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 280.0,
+   "prior_pt": 265.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Jefferies",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 300.0,
+   "prior_pt": 275.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 288.0,
+   "prior_pt": 285.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Rosenblatt",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 325.0,
+   "prior_pt": 325.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Keybanc",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 310.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Benchmark",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 335.0,
+   "prior_pt": 250.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "B of A Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 350.0,
+   "prior_pt": 320.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Baird",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 500.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-05-21",
+   "firm": "Needham",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 270.0,
+   "prior_pt": 240.0
+  },
+  {
+   "date": "2026-05-19",
+   "firm": "HSBC",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 325.0,
+   "prior_pt": 295.0
+  },
+  {
+   "date": "2026-05-18",
+   "firm": "DA Davidson",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 300.0,
+   "prior_pt": 250.0
+  },
+  {
+   "date": "2026-05-18",
+   "firm": "Morgan Stanley",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 285.0,
+   "prior_pt": 260.0
+  },
+  {
+   "date": "2026-05-18",
+   "firm": "Wedbush",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-05-18",
+   "firm": "Keybanc",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 300.0,
+   "prior_pt": 275.0
+  },
+  {
+   "date": "2026-05-15",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 275.0,
+   "prior_pt": 235.0
+  },
+  {
+   "date": "2026-05-14",
+   "firm": "UBS",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 275.0,
+   "prior_pt": 245.0
+  },
+  {
+   "date": "2026-05-14",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 250.0,
+   "prior_pt": 250.0
+  },
+  {
+   "date": "2026-05-14",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 350.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-05-12",
+   "firm": "Wells Fargo",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 315.0,
+   "prior_pt": 265.0
+  },
+  {
+   "date": "2026-03-31",
+   "firm": "Benchmark",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 250.0,
+   "prior_pt": 250.0
+  },
+  {
+   "date": "2026-03-23",
+   "firm": "Rosenblatt",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 325.0,
+   "prior_pt": 325.0
+  },
+  {
+   "date": "2026-03-23",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 300.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-03-19",
+   "firm": "Raymond James",
+   "to": "Strong Buy",
+   "from": "Strong Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 323.0,
+   "prior_pt": 291.0
+  },
+  {
+   "date": "2026-03-18",
+   "firm": "Truist Securities",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 287.0,
+   "prior_pt": 283.0
+  },
+  {
+   "date": "2026-03-18",
+   "firm": "Rosenblatt",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 325.0,
+   "prior_pt": 300.0
+  },
+  {
+   "date": "2026-03-18",
+   "firm": "Needham",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 240.0,
+   "prior_pt": 240.0
+  },
+  {
+   "date": "2026-03-17",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 235.0,
+   "prior_pt": 235.0
+  },
+  {
+   "date": "2026-03-17",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 250.0,
+   "prior_pt": 250.0
+  },
+  {
+   "date": "2026-03-17",
+   "firm": "Keybanc",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 275.0,
+   "prior_pt": 275.0
+  }
+ ],
+ "price_targets": {
+  "current": 176.725,
+  "high": 515.0,
+  "low": 180.0,
+  "mean": 319.98773,
+  "median": 315.0
+ },
+ "eps_trend": {
+  "0q": {
+   "current": 2.47461,
+   "7daysAgo": 2.47325,
+   "30daysAgo": 2.47325,
+   "60daysAgo": 2.47269,
+   "90daysAgo": 2.35189
+  },
+  "+1q": {
+   "current": 2.74979,
+   "7daysAgo": 2.74622,
+   "30daysAgo": 2.74622,
+   "60daysAgo": 2.74328,
+   "90daysAgo": 2.66095
+  },
+  "0y": {
+   "current": 9.31674,
+   "7daysAgo": 9.31242,
+   "30daysAgo": 9.31242,
+   "60daysAgo": 9.30456,
+   "90daysAgo": 8.96264
+  },
+  "+1y": {
+   "current": 15.90883,
+   "7daysAgo": 15.9146,
+   "30daysAgo": 15.9146,
+   "60daysAgo": 15.56753,
+   "90daysAgo": 12.83803
+  }
+ },
+ "eps_revisions": {
+  "0q": {
+   "upLast7days": 0.0,
+   "upLast30days": 0.0,
+   "downLast30days": 1.0,
+   "downLast7Days": 1.0
+  },
+  "+1q": {
+   "upLast7days": 0.0,
+   "upLast30days": 0.0,
+   "downLast30days": 1.0,
+   "downLast7Days": 1.0
+  },
+  "0y": {
+   "upLast7days": 2.0,
+   "upLast30days": 2.0,
+   "downLast30days": 0.0,
+   "downLast7Days": 0.0
+  },
+  "+1y": {
+   "upLast7days": 3.0,
+   "upLast30days": 7.0,
+   "downLast30days": 0.0,
+   "downLast7Days": 0.0
+  }
+ },
+ "growth": {
+  "0q": {
+   "stockTrend": 0.90349996,
+   "indexTrend": 0.28959998
+  },
+  "+1q": {
+   "stockTrend": 0.6974,
+   "indexTrend": 0.2711
+  },
+  "0y": {
+   "stockTrend": 0.9532,
+   "indexTrend": 0.33290002
+  },
+  "+1y": {
+   "stockTrend": 0.7076,
+   "indexTrend": 0.16690001
+  },
+  "LTG": {
+   "indexTrend": 0.122
+  }
+ },
+ "earnings_estimate": {
+  "0q": {
+   "avg": 2.47461,
+   "low": 2.34,
+   "high": 2.7,
+   "yearAgoEps": 1.3,
+   "numberOfAnalysts": 44.0,
+   "growth": 0.90349996
+  },
+  "+1q": {
+   "avg": 2.74979,
+   "low": 2.56,
+   "high": 3.117,
+   "yearAgoEps": 1.62,
+   "numberOfAnalysts": 42.0,
+   "growth": 0.6974
+  },
+  "0y": {
+   "avg": 9.31674,
+   "low": 9.01,
+   "high": 10.1,
+   "yearAgoEps": 4.77,
+   "numberOfAnalysts": 51.0,
+   "growth": 0.9532
+  },
+  "+1y": {
+   "avg": 15.90883,
+   "low": 12.84835,
+   "high": 18.746,
+   "yearAgoEps": 9.31674,
+   "numberOfAnalysts": 52.0,
+   "growth": 0.7076
+  }
+ },
+ "recommendations": [
+  {
+   "period": "0m",
+   "strongBuy": 10,
+   "buy": 47,
+   "hold": 4,
+   "sell": 1,
+   "strongSell": 0
+  },
+  {
+   "period": "-1m",
+   "strongBuy": 10,
+   "buy": 49,
+   "hold": 2,
+   "sell": 1,
+   "strongSell": 0
+  },
+  {
+   "period": "-2m",
+   "strongBuy": 10,
+   "buy": 49,
+   "hold": 2,
+   "sell": 1,
+   "strongSell": 0
+  },
+  {
+   "period": "-3m",
+   "strongBuy": 9,
+   "buy": 48,
+   "hold": 2,
+   "sell": 1,
+   "strongSell": 0
+  }
+ ]
+}

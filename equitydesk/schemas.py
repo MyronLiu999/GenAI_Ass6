@@ -27,6 +27,59 @@ class AnalystReport(BaseModel):
     data_gaps: list[str] = Field(default_factory=list, description="Important evidence that is missing.")
 
 
+class HeadlineView(BaseModel):
+    id: str = Field(description="The headline's evidence id, e.g. 'N.3'.")
+    relevant: bool = Field(description="False if the headline is really about another company or is generic noise.")
+    tone: Literal["positive", "neutral", "negative"] = Field(description="For this stock's investors.")
+    materiality: Literal["high", "medium", "low"] = Field(description="Could it change earnings, risk or valuation?")
+    why: str = Field(description="One short sentence.")
+
+
+class SentimentReport(AnalystReport):
+    """The sentiment analyst's report, plus a triage of every headline (shown on the News tab)."""
+
+    headlines: list[HeadlineView] = Field(description="One entry for every N.* headline in the evidence.")
+
+
+class StreetReport(AnalystReport):
+    """What the sell-side and independent research say, distilled, and what it implies."""
+
+    consensus_view: str = Field(description="The street's view in three to four sentences: direction, how it is "
+                                            "moving (actions, target cuts/raises, estimate revisions), and how fresh it is.")
+    street_bull: list[Point] = Field(description="The strongest bull arguments made by researchers, each attributed "
+                                                 "to its firm and cited (W/A ids).")
+    street_bear: list[Point] = Field(description="The strongest bear arguments made by researchers, attributed and cited.")
+    recent_changes: list[Point] = Field(description="What changed in the last 30 days (rating or target moves, "
+                                                    "estimate revisions), cited.")
+    key_debates: list[str] = Field(description="The two or three questions the street is divided on.")
+
+
+class ResearchNote(BaseModel):
+    source_ids: list[str] = Field(description="The [S<n>] markers this note comes from. Required; notes without "
+                                              "one are discarded.")
+    source: str = Field(description="Firm, author or publication, e.g. 'Baird' or 'Morningstar'.")
+    date: str = Field(description="YYYY-MM-DD if known, else the best available date.")
+    kind: Literal["sell-side note", "rating change", "independent research", "news analysis"]
+    stance: Literal["bullish", "neutral", "bearish"]
+    rating: str = Field(default="", description="The rating as stated (e.g. 'Neutral (from Outperform)').")
+    price_target: float | None = Field(default=None, description="New price target, if stated.")
+    prior_target: float | None = Field(default=None, description="Previous price target, if stated.")
+    thesis: str = Field(description="The core argument in one or two sentences.")
+    key_points: list[str] = Field(default_factory=list, description="Up to four supporting arguments.")
+
+
+class ResearchNotes(BaseModel):
+    notes: list[ResearchNote]
+    debates: list[str] = Field(default_factory=list, description="Debates the sources describe, with [S<n>] markers.")
+
+
+class NewsTriage(BaseModel):
+    items: list[HeadlineView]
+
+
+SCHEMAS = {"AnalystReport": AnalystReport, "SentimentReport": SentimentReport, "StreetReport": StreetReport}
+
+
 class DebateTurn(BaseModel):
     """One side's argument in the bull/bear debate."""
 
@@ -52,6 +105,11 @@ class Decision(BaseModel):
         "Required. How your previous calls on this ticker (hits or misses) and the user's notes shaped this call; "
         "if there is no history and no note, say so explicitly."))
     override_rationale: str = Field(default="", description="Required when the rating departs from the analysts' consensus.")
+    key_debates: list[str] = Field(min_length=1, description=(
+        "The two or three questions the outcome hinges on, each with the side you take and why, cited."))
+    variant_view: str = Field(min_length=10, description=(
+        "Where this call differs from the street (cite A/W ids) and why the street may be wrong; or, if you agree "
+        "with the street, what you see that it does not price in."))
 
 
 class QAAnswer(BaseModel):

@@ -13,3 +13,8 @@ models:
   claude-haiku-5-5:  {input: 0.10, output: 0.50,  cache_read: 0.01, source: "https://platform.claude.com/docs/en/about-claude/pricing", read: 2026-10-11}
   gemini-3.5-flash-lite: {input: 0.30, output: 2.50, cache_read: 0.03, source: "https://ai.google.dev/gemini-api/docs/pricing", read: 2026-10-11}
   scripted:          {input: 0.00, output: 0.00, source: "offline scripted model", read: 2026-11-11}
+
+# Hosted tools, USD per call, charged on top of the tokens (the search results the model reads are billed
+# as input tokens at the model's rate). Conservative estimate: verify against the vendor page and update.
+tools:
+  web_search: {per_call: 0.025, source: "https://platform.openai.com/docs/pricing (web search tool)", read: 2026-11-11}

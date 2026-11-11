@@ -7,10 +7,11 @@ import streamlit as st
 
 from equitydesk.memory.store import GLOBAL
 from equitydesk.policy.guards import InputError, normalize_ticker
+from equitydesk.ui import components as ui
 from equitydesk.ui.common import desk, open_report
 
 d = desk()
-st.title("Memory & profile")
+ui.page_header("Memory & profile", "What the desk remembers about you and about its own past calls. All of it editable.")
 
 st.subheader("Risk profile")
 st.caption("Used in code for position sizing and stops, and shown to the portfolio manager.")

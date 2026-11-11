@@ -46,8 +46,12 @@ def render_markdown(r: dict) -> str:
     d, plan, g = r["decision"], r["plan"], r.get("grounding") or {}
     lines += [f"## Rating: **{RATING_LABEL[d['rating']]}** · conviction {d['conviction']}/100 · horizon "
               f"{d['horizon_months']} months", "", f"Last close {fmt(r.get('price'), '$')}.", "",
-              "### Thesis", d["thesis"], "", "### Drivers", *_points(d.get("drivers")), "",
-              "### Risks", *_points(d.get("risks")), ""]
+              "### Thesis", d["thesis"], ""]
+    if d.get("variant_view"):
+        lines += ["### Variant view (versus the street)", d["variant_view"], ""]
+    if d.get("key_debates"):
+        lines += ["### Key debates", *[f"- {x}" for x in d["key_debates"]], ""]
+    lines += ["### Drivers", *_points(d.get("drivers")), "", "### Risks", *_points(d.get("risks")), ""]
     if d.get("catalysts"):
         lines += ["### Catalysts", *[f"- {c}" for c in d["catalysts"]], ""]
     if d.get("invalidation"):
@@ -65,8 +69,41 @@ def render_markdown(r: dict) -> str:
         lines += ["### Memory", d["memory_note"], ""]
     if d.get("override_rationale"):
         lines += ["### Override rationale", d["override_rationale"], ""]
+    facts = index(r.get("facts") or [])
+    street = (r.get("analysts") or {}).get("street") or {}
+    research = r.get("research") or {}
+    actions = [f for fid, f in facts.items() if fid.startswith("A.action_")]
+    if street.get("consensus_view") or actions or research.get("notes"):
+        lines += ["## Street research", ""]
+        if street.get("consensus_view"):
+            lines += [street["consensus_view"], ""]
+        if street.get("street_bull") or street.get("street_bear"):
+            lines += ["**Street bull case**", *_points(street.get("street_bull")), "",
+                      "**Street bear case**", *_points(street.get("street_bear")), ""]
+        if street.get("recent_changes"):
+            lines += ["**What changed recently**", *_points(street.get("recent_changes")), ""]
+        if actions:
+            lines += ["**Latest sell-side actions**", *[f"- {f.as_of} · {f.value} [{f.id}]" for f in actions], ""]
+        if research.get("notes"):
+            lines += [f"**Research notes found on the web** ({len(research['notes'])} kept with verified sources"
+                      + (f", {research['dropped']} dropped" if research.get("dropped") else "") + ")"]
+            for n in research["notes"]:
+                tgt = f", target ${n['price_target']:,.0f}" if n.get("price_target") else ""
+                lines.append(f"- **{n['source']}** ({n.get('date', '')}, {n.get('stance', '')}{tgt}): {n.get('thesis', '')} "
+                             f"[source]({n['url']}) [{n.get('fact_id', '')}]")
+            lines.append("")
+    heads = (r.get("analysts") or {}).get("sentiment", {}).get("headlines") or []
+    if heads:
+        lines += ["## News triage", "", "| id | headline | tone | materiality | why |", "|---|---|---|---|---|"]
+        for h in sorted(heads, key=lambda h: ("high", "medium", "low").index(h.get("materiality", "low"))):
+            f = facts.get(h["id"])
+            if f and h.get("relevant", True):
+                lines.append(f"| {h['id']} | {f.label.replace('|', '/')} | {h['tone']} | {h['materiality']} | "
+                             f"{h.get('why', '').replace('|', '/')} |")
+        lines.append("")
     lines += ["## Analyst views", ""]
-    titles = {"fundamental": "Fundamental", "technical": "Technical", "sentiment": "Sentiment & News", "risk": "Risk"}
+    titles = {"fundamental": "Fundamental", "technical": "Technical", "sentiment": "Sentiment & News", "risk": "Risk",
+              "street": "Street research"}
     for name, rep in (r.get("analysts") or {}).items():
         if rep.get("failed"):
             lines += [f"### {titles.get(name, name)}: failed", rep.get("error", ""), ""]

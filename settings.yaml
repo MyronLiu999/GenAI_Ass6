@@ -16,7 +16,7 @@ model:
   api_key_env: OPENAI_API_KEY
   base_url: null
 
-# Optional per-role overrides, merged onto `model`. Roles: analyst, debate, pm, qa.
+# Optional per-role overrides, merged onto `model`. Roles: analyst, debate, pm, qa, research.
 # Example: run the four analysts on a cheaper model and keep the PM on the strong one.
 roles: {}
 #  analyst: {name: gpt-4o-mini}
@@ -49,6 +49,15 @@ data:
   staleness_days: 5            # last bar older than this many days -> warning in the report
   risk_free_rate_pct: 4.0
   atr_stop_multiple: 2.0
+
+# Web research: the desk searches the web for recent sell-side notes and independent research, keeps only
+# sources the search tool actually cited (equitydesk/policy/provenance.py), and a Street Research analyst
+# distils them. Needs provider openai; elsewhere the desk runs on the structured sell-side data alone.
+research:
+  web_search: true
+  context_size: medium         # low | medium | high: how much page content the search reads (cost scales)
+  max_notes: 8
+  lookback_days: 60
 
 paths:
   data_dir: data               # cache, SQLite stores, run traces (git-ignored)

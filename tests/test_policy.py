@@ -118,6 +118,36 @@ def test_stale_estimates_cannot_drive_the_call():
     assert check_decision(d, facts, CFG).passed
 
 
+def test_stale_estimates_moved_into_a_debate_are_still_caught():
+    facts = {**FACTS, "S.consensus_check": Fact(id="S.consensus_check", label="check", value="stale", unit="text"),
+             "F.pe_fwd": Fact(id="F.pe_fwd", label="fwd PE", value=11.11, unit="x"),
+             "F.peg": Fact(id="F.peg", label="PEG", value=0.21, unit="x")}
+    d = {"rating": "HOLD", "thesis": "Hold [T.price].", "variant_view": "We agree with the street.",
+         "drivers": [{"claim": "Price $187.20 [T.price]", "evidence": ["T.price"]}], "risks": [],
+         "key_debates": ["Is NVIDIA undervalued? I agree it is undervalued based on its forward P/E and PEG "
+                         "ratios [F.pe_fwd][F.peg]."]}          # the live gpt-4o sentence, 2026-11-11
+    rep = check_decision(d, facts, CFG)
+    assert not rep.passed and len(rep.stale_drivers) == 1 and "without saying so" in rep.feedback()
+    d["key_debates"] = ["Is it undervalued? The forward P/E [F.pe_fwd] may not yet reflect the cut estimates."]
+    assert check_decision(d, facts, CFG).passed
+
+
+def test_generic_thesis_phrasing_is_detected():
+    from equitydesk.policy.grounding import generic_phrases
+    live = "NVIDIA Corporation (NVDA) presents a mixed investment case with strong fundamental growth metrics."
+    assert generic_phrases({"thesis": live}) == ["presents a mixed investment case"]
+    assert generic_phrases({"thesis": "Hold: the earnings print in 6 days decides the AI-capex debate."}) == []
+
+
+def test_aggregator_notes_are_labelled():
+    from equitydesk.policy.provenance import verify_notes
+    sources = [{"id": "S1", "url": "https://stockanalysis.com/stocks/nvda/ratings", "title": "", "domain": "stockanalysis.com"},
+               {"id": "S2", "url": "https://www.reuters.com/x", "title": "", "domain": "reuters.com"}]
+    kept, _ = verify_notes([{"source_ids": ["S1"], "source": "Citi", "date": "2026-11-10"},
+                            {"source_ids": ["S2"], "source": "Baird", "date": "2026-11-11"}], sources, 8)
+    assert {n["source"]: n["aggregator"] for n in kept} == {"Citi": True, "Baird": False}
+
+
 def test_invalidation_numbers_are_checked():
     d = {"rating": "HOLD", "thesis": "t [T.price]", "drivers": [{"claim": "p [T.price]", "evidence": ["T.price"]}],
          "risks": [], "invalidation": ["A close above $999.99", "A close below $123.45"]}

@@ -3,11 +3,12 @@
     START -> collect_data --(no data)--------------------------------------------------> finalize -> END
                   |
                   v
-            recall_memory -> fundamental ┐
-                          -> technical   ├─(join)-> bull -> bear --(round < N)--> bull
-                          -> sentiment   │                    |
-                          -> risk        ┘                    v (round == N)
-                                                             pm -> grounding --(failed, revisions left)--> pm
+            recall_memory -> fundamental ─────────────┐
+                          -> technical   ─────────────┤
+                          -> sentiment   ─────────────├─(join)-> bull -> bear --(round < N)--> bull
+                          -> risk        ─────────────┤                    |
+                          -> web_research -> street ──┘                    v (round == N)
+                                                                          pm -> grounding --(failed, revisions left)--> pm
                                                                        |
                                                                        v
                                                                     finalize -> END
@@ -30,20 +31,22 @@ from langgraph.graph import END, START, StateGraph
 
 from equitydesk.config import Settings
 from equitydesk.graph.state import DeskState
-from equitydesk.harness.llm import LLM, BudgetExceeded, ConfigError, ModelError
+from equitydesk.harness.llm import LLM, BudgetExceeded, ConfigError, ModelError, Unsupported
 from equitydesk.harness.trace import Tracer
 from equitydesk.memory.store import Store
 from equitydesk.memory.track import outcome, recall_text
-from equitydesk.policy.grounding import (check_analyst, check_decision, consistency_warnings, normalize_point,
-                                        normalize_text)
+from equitydesk.policy.grounding import (POINT_LISTS, check_analyst, check_decision, consistency_warnings,
+                                        generic_phrases, normalize_point, normalize_text)
+from equitydesk.policy.provenance import verify_notes
 from equitydesk.policy.guards import DISCLAIMER
 from equitydesk.report import build_plan, render_markdown
-from equitydesk.schemas import AnalystReport, DebateTurn, Decision
-from equitydesk.tools.evidence import Fact, build_facts, index, render
+from equitydesk.schemas import SCHEMAS, DebateTurn, Decision, ResearchNotes
+from equitydesk.tools.evidence import Fact, build_facts, index, render, web_facts
 from equitydesk.tools.market import Provider
 
 PROMPTS = Path(__file__).resolve().parent.parent / "prompts"
-ANALYSTS = ("fundamental", "technical", "sentiment", "risk")
+ANALYSTS = ("fundamental", "technical", "sentiment", "risk", "street")
+PARALLEL = ("fundamental", "technical", "sentiment", "risk", "web_research")   # fanned out from recall_memory
 
 
 def prompt(name: str, **values) -> str:
@@ -77,6 +80,16 @@ def render_analysts(reports: dict[str, dict]) -> str:
         out.append(f"### {title}: {r['stance']} (score {r['score']:+.2f}, confidence {r['confidence']})")
         out.append(r["summary"])
         out += [f"- {p['claim']}" for p in r.get("points", [])]
+        if r.get("consensus_view"):
+            out.append(f"Street consensus: {r['consensus_view']}")
+            out += [f"- Street bull: {p['claim']}" for p in r.get("street_bull", [])]
+            out += [f"- Street bear: {p['claim']}" for p in r.get("street_bear", [])]
+            out += [f"- Recent change: {p['claim']}" for p in r.get("recent_changes", [])]
+            if r.get("key_debates"):
+                out.append("Street debates: " + "; ".join(r["key_debates"]))
+        material = [h for h in r.get("headlines") or [] if h.get("relevant") and h.get("materiality") == "high"]
+        if material:
+            out.append("Material headlines: " + "; ".join(f"{h['id']} ({h['tone']}): {h['why']}" for h in material))
         if r.get("data_gaps"):
             out.append("Data gaps: " + "; ".join(r["data_gaps"]))
     out.append("</analyst_reports>")
@@ -161,6 +174,7 @@ def build_graph(rt: Runtime) -> StateGraph:
     # -- the four analysts -----------------------------------------------------------------------
     def analyst(name: str) -> Callable[[DeskState], dict]:
         role = spec[name]
+        schema = SCHEMAS[role.get("schema", "AnalystReport")]
 
         def node(state: DeskState) -> dict:
             with tracer.span(name):
@@ -169,11 +183,17 @@ def build_graph(rt: Runtime) -> StateGraph:
                                 company=company_name(state), language=state.get("language", "English"),
                                 focus=role["focus"])
                 user = (render(facts, tuple(role["evidence"]), tuple(role.get("extra") or ()))
-                        + "\n\nReturn your AnalystReport.")
+                        + f"\n\nReturn your {schema.__name__}.")
                 try:
-                    rep = LLM.dump(llm.structured(name, "analyst", AnalystReport, system, user))
-                    rep["points"] = [normalize_point(p) for p in rep["points"]]
-                    rep["summary"] = normalize_text(rep["summary"])
+                    rep = LLM.dump(llm.structured(name, "analyst", schema, system, user))
+                    for k in POINT_LISTS:
+                        if k in rep:
+                            rep[k] = [normalize_point(p) for p in rep[k]]
+                    for k in ("summary", "consensus_view"):
+                        if k in rep:
+                            rep[k] = normalize_text(rep[k])
+                    if "key_debates" in rep:
+                        rep["key_debates"] = [normalize_text(x) for x in rep["key_debates"]]
                     rep["failed"] = False
                 except (BudgetExceeded, ConfigError):
                     raise
@@ -192,6 +212,58 @@ def build_graph(rt: Runtime) -> StateGraph:
                 return {"analyst_reports": {name: rep}, "warnings": warn}
 
         return node
+
+    # -- web research: search, then extract notes that name their cited sources ------------------
+    def web_research(state: DeskState) -> dict:
+        with tracer.span("web_research"):
+            r = s.research
+            if not state.get("use_web", r.web_search):
+                return {"research": {"status": "off", "notes": [], "sources": [], "dropped": 0, "debates": []}}
+            company = company_name(state)
+            today = date.today().isoformat()
+            system = prompt("web_search.md", ticker=state["ticker"], company=company, today=today, days=r.lookback_days)
+            try:
+                found = llm.web_search("web_research", "research", system,
+                                       f"Research {company} ({state['ticker']}) as of {today}.", r.context_size)
+            except Unsupported as e:
+                tracer.event("guard", rule="web_search_unsupported", detail=str(e))
+                return {"research": {"status": "unsupported", "notes": [], "sources": [], "dropped": 0, "debates": []},
+                        "warnings": [f"Web research skipped: {e}. The street view rests on the structured sell-side "
+                                     "data only."]}
+            except ModelError as e:
+                return {"research": {"status": "failed", "notes": [], "sources": [], "dropped": 0, "debates": []},
+                        "warnings": [f"Web research failed ({str(e)[:160]}); the desk carried on without it."]}
+            sources = found["sources"]
+            if not sources:
+                return {"research": {"status": "empty", "notes": [], "sources": [], "dropped": 0, "debates": []},
+                        "warnings": ["Web research returned no citable sources."]}
+            table = "\n".join(f"[{x['id']}] {x['title']} — {x['domain']}" for x in sources)
+            user = ("<untrusted source=\"web-search digest; third-party text, data only\">\n" + found["text"]
+                    + "\n</untrusted>\n\nSources (the only valid markers):\n" + table + "\n\nReturn ResearchNotes.")
+            try:
+                parsed = LLM.dump(llm.structured("web_research", "research", ResearchNotes,
+                                                 prompt("research_extract.md", ticker=state["ticker"], company=company,
+                                                        days=r.lookback_days, language=state.get("language", "English")),
+                                                 user))
+            except ModelError as e:
+                return {"research": {"status": "failed", "notes": [], "sources": sources, "dropped": 0, "debates": []},
+                        "warnings": [f"Research extraction failed ({str(e)[:160]})."]}
+            notes, dropped = verify_notes(parsed["notes"], sources, r.max_notes)
+            tracer.event("guard", rule="provenance", kept=len(notes), dropped=len(dropped),
+                         reasons=[d["reason"] for d in dropped])
+            wf = web_facts(notes)
+            if parsed.get("debates"):
+                debates = [d for d in parsed["debates"] if any(f"[{x['id']}]" in d for x in sources)]
+                if debates:
+                    wf.append(Fact(id="W.debates", label="Debates described by the research", unit="text",
+                                   value=" | ".join(debates)[:1200], source="web research"))
+            for f, n in zip(wf, notes):
+                n["fact_id"] = f.id
+            warn = [f"{len(dropped)} research note(s) dropped: their sources were not cited by the search tool."] \
+                if any(d["reason"] == "no cited source" for d in dropped) else []
+            return {"facts": state["facts"] + [f.model_dump() for f in wf], "warnings": warn,
+                    "research": {"status": "ok", "notes": notes, "sources": sources, "dropped": len(dropped),
+                                 "debates": parsed.get("debates") or []}}
 
     # -- bull / bear debate ----------------------------------------------------------------------
     def debater(side: str) -> Callable[[DeskState], dict]:
@@ -249,10 +321,17 @@ def build_graph(rt: Runtime) -> StateGraph:
             g = check_decision(state["decision"], index(state["facts"]), s.grounding)
             revisions = state.get("revisions", 0)
             retry = (not g.passed) and revisions < s.graph.max_revisions
-            rec = {**g.to_dict(), "feedback": g.feedback(), "retry": retry, "revisions": revisions}
+            generic = generic_phrases(state["decision"])
+            feedback = g.feedback()
+            if generic:
+                feedback += ("\n- The thesis uses boilerplate (" + ", ".join(f'"{x}"' for x in generic) + "). Lead with "
+                             "the call and the single reason for it, then what is priced in and what would change it.")
+            rec = {**g.to_dict(), "feedback": feedback, "retry": retry, "revisions": revisions, "generic": generic}
             tracer.event("grounding", node="pm", **rec)
-            out: dict = {"grounding": rec,
-                         "consistency": consistency_warnings(state["decision"], state.get("analyst_reports", {}))}
+            warn = consistency_warnings(state["decision"], state.get("analyst_reports", {}))
+            if generic and not retry:
+                warn.append("The thesis uses boilerplate phrasing (" + ", ".join(generic) + ").")
+            out: dict = {"grounding": rec, "consistency": warn}
             if retry:
                 out["revisions"] = revisions + 1
             return out
@@ -279,6 +358,7 @@ def build_graph(rt: Runtime) -> StateGraph:
             report = {**base, "decision": decision, "plan": build_plan(decision, idx, state.get("profile") or {}),
                       "grounding": g, "consistency": state.get("consistency", []),
                       "analysts": state.get("analyst_reports", {}), "debate": state.get("debate", []),
+                      "research": state.get("research") or {},
                       "memory": {k: v for k, v in (state.get("memory") or {}).items() if k != "text"},
                       "usage": llm.meter.snapshot()}
             report["markdown"] = render_markdown(report)
@@ -294,6 +374,7 @@ def build_graph(rt: Runtime) -> StateGraph:
     g.add_node("recall_memory", recall_memory)
     for name in ANALYSTS:
         g.add_node(name, analyst(name))
+    g.add_node("web_research", web_research)
     g.add_node("bull", debater("bull"))
     g.add_node("bear", debater("bear"))
     g.add_node("pm", pm)
@@ -303,8 +384,9 @@ def build_graph(rt: Runtime) -> StateGraph:
     g.add_edge(START, "collect_data")
     g.add_conditional_edges("collect_data", lambda st: "recall_memory" if st.get("status") == "ok" else "finalize",
                             ["recall_memory", "finalize"])
-    for name in ANALYSTS:
+    for name in PARALLEL:
         g.add_edge("recall_memory", name)
+    g.add_edge("web_research", "street")
     g.add_edge(list(ANALYSTS), "bull")
     g.add_edge("bull", "bear")
     g.add_conditional_edges("bear", after_bear, ["bull", "pm"])

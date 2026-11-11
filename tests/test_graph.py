@@ -18,12 +18,21 @@ def test_full_run(make_desk):
     run_id, events = run(desk, rounds=2)
     nodes = [e["node"] for e in events if e["type"] == "node"]
     assert nodes[:2] == ["collect_data", "recall_memory"]
-    assert set(nodes[2:6]) == {"fundamental", "technical", "sentiment", "risk"}   # parallel fan-out
-    assert nodes[6:] == ["bull", "bear", "bull", "bear", "pm", "grounding", "finalize"]
+    assert set(nodes[2:7]) == {"fundamental", "technical", "sentiment", "risk", "web_research"}   # fan-out
+    assert nodes[7:] == ["street", "bull", "bear", "bull", "bear", "pm", "grounding", "finalize"]
     done = events[-1]
     assert done["type"] == "done"
     rep = done["report"]
     assert rep["status"] == "ok" and rep["decision"]["rating"] == "HOLD" and rep["grounding"]["passed"]
+    # web research: notes kept only with verified sources, and turned into W.* evidence
+    research = rep["research"]
+    assert research["status"] == "ok" and len(research["notes"]) == 2
+    assert all(n["url"].startswith("https://example.com/") for n in research["notes"])
+    assert {"W.1", "W.2"} <= {f["id"] for f in rep["facts"]}
+    street = rep["analysts"]["street"]
+    assert street["consensus_view"] and street["grounding"]["passed"]
+    assert {h["id"] for h in rep["analysts"]["sentiment"]["headlines"]} == {"N.1", "N.2", "N.3", "N.4"}
+    assert rep["decision"]["key_debates"] and rep["decision"]["variant_view"]
     assert len(rep["debate"]) == 4 and {t["side"] for t in rep["debate"]} == {"bull", "bear"}
     assert any("flagged" in w for w in rep["warnings"])                      # the planted injection headline
     assert "not investment advice" in rep["markdown"]
@@ -32,7 +41,18 @@ def test_full_run(make_desk):
     types = {e["type"] for e in trace}
     assert {"run_start", "tool_call", "node_start", "node_end", "llm_call", "grounding", "memory_read",
             "memory_write", "run_end"} <= types
-    assert sum(1 for e in trace if e["type"] == "llm_call") == 4 + 4 + 1
+    # 4 analysts + web search + note extraction + street analyst + 4 debate turns + PM
+    assert sum(1 for e in trace if e["type"] == "llm_call") == 4 + 2 + 1 + 4 + 1
+    assert any(e["type"] == "guard" and e.get("rule") == "provenance" for e in trace)
+
+
+def test_web_research_off_still_runs_street_on_structured_data(make_desk):
+    desk = make_desk()
+    run_id = desk.start("DEMO", 1, web_research=False)
+    rep = list(desk.stream(run_id))[-1]["report"]
+    assert rep["research"]["status"] == "off" and not any(f["id"].startswith("W.") for f in rep["facts"])
+    assert not rep["analysts"]["street"]["failed"]
+    assert any(f["id"].startswith("A.") for f in rep["facts"])
 
 
 def test_rounds_are_clamped(make_desk):
@@ -56,6 +76,7 @@ def test_grounding_failure_triggers_one_revision(make_desk):
     run_id, events = run(desk, rounds=1)
     nodes = [e["node"] for e in events if e["type"] == "node"]
     assert nodes[-5:] == ["pm", "grounding", "pm", "grounding", "finalize"]
+    assert "street" in nodes
     g = events[-1]["report"]["grounding"]
     assert g["passed"] and g["revisions"] == 1
     prompts = [e for e in read_trace(run_id, desk.s.runs_dir) if e["type"] == "grounding" and e["node"] == "pm"]

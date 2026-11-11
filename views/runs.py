@@ -9,10 +9,11 @@ import plotly.express as px
 import streamlit as st
 
 from equitydesk.harness.trace import read_prompts, read_trace
+from equitydesk.ui import components as ui
 from equitydesk.ui.common import NODE_LABEL, desk, open_report
 
 d = desk()
-st.title("Runs & traces")
+ui.page_header("Runs & traces", "The ledger of every run, and a step-by-step record of what each one did and cost.")
 
 runs = d.store.list_runs()
 if not runs:

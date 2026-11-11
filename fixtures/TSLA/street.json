@@ -1,0 +1,956 @@
+{
+ "actions": [
+  {
+   "date": "2026-11-05",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 24.86,
+   "prior_pt": 24.86
+  },
+  {
+   "date": "2026-10-26",
+   "firm": "Barclays",
+   "to": "Overweight",
+   "from": "Equal-Weight",
+   "action": "up",
+   "pt_action": "Raises",
+   "pt": 450.0,
+   "prior_pt": 370.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "UBS",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 425.0,
+   "prior_pt": 391.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "CLSA",
+   "to": "Hold",
+   "from": "Underperform",
+   "action": "up",
+   "pt_action": "Raises",
+   "pt": 400.0,
+   "prior_pt": 310.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "Canaccord Genuity",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 442.0,
+   "prior_pt": 410.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 410.0,
+   "prior_pt": 400.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "BNP Paribas",
+   "to": "Neutral",
+   "from": "Underperform",
+   "action": "up",
+   "pt_action": "Raises",
+   "pt": 420.0,
+   "prior_pt": 266.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 480.0,
+   "prior_pt": 480.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "JP Morgan",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 430.0,
+   "prior_pt": 415.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 460.0,
+   "prior_pt": 460.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 475.0,
+   "prior_pt": 450.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "StoneX",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 475.0,
+   "prior_pt": 475.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 24.86,
+   "prior_pt": 24.86
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "Mizuho",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 460.0,
+   "prior_pt": 450.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 485.0,
+   "prior_pt": 485.0
+  },
+  {
+   "date": "2026-10-22",
+   "firm": "Needham",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "reit",
+   "pt_action": "",
+   "pt": null,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-10-20",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 485.0,
+   "prior_pt": 485.0
+  },
+  {
+   "date": "2026-10-15",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 24.86,
+   "prior_pt": 24.86
+  },
+  {
+   "date": "2026-10-12",
+   "firm": "Jefferies",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 400.0,
+   "prior_pt": 350.0
+  },
+  {
+   "date": "2026-10-08",
+   "firm": "Tigress Financial",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 550.0,
+   "prior_pt": 550.0
+  },
+  {
+   "date": "2026-10-07",
+   "firm": "UBS",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 391.0,
+   "prior_pt": 385.0
+  },
+  {
+   "date": "2026-09-28",
+   "firm": "JP Morgan",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 415.0,
+   "prior_pt": 445.0
+  },
+  {
+   "date": "2026-09-25",
+   "firm": "StoneX",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 475.0,
+   "prior_pt": 475.0
+  },
+  {
+   "date": "2026-09-16",
+   "firm": "Goldman Sachs",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 360.0,
+   "prior_pt": 360.0
+  },
+  {
+   "date": "2026-09-04",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 24.86,
+   "prior_pt": 24.86
+  },
+  {
+   "date": "2026-09-03",
+   "firm": "StoneX",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 475.0,
+   "prior_pt": 475.0
+  },
+  {
+   "date": "2026-08-18",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 24.86,
+   "prior_pt": 24.86
+  },
+  {
+   "date": "2026-08-03",
+   "firm": "Stifel",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 491.0,
+   "prior_pt": 508.0
+  },
+  {
+   "date": "2026-07-24",
+   "firm": "Piper Sandler",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 450.0,
+   "prior_pt": 500.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "UBS",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 385.0,
+   "prior_pt": 442.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "JP Morgan",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 445.0,
+   "prior_pt": 475.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 400.0,
+   "prior_pt": 417.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 370.0,
+   "prior_pt": 430.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "Mizuho",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 450.0,
+   "prior_pt": 480.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 460.0,
+   "prior_pt": 490.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "Canaccord Genuity",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 410.0,
+   "prior_pt": 450.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 500.0,
+   "prior_pt": 500.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "Roth Capital",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 505.0,
+   "prior_pt": 505.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 485.0,
+   "prior_pt": 510.0
+  },
+  {
+   "date": "2026-07-23",
+   "firm": "Needham",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "reit",
+   "pt_action": "",
+   "pt": null,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-07-21",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 24.86,
+   "prior_pt": 24.86
+  },
+  {
+   "date": "2026-07-14",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 417.0,
+   "prior_pt": 415.0
+  },
+  {
+   "date": "2026-07-14",
+   "firm": "Barclays",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 370.0,
+   "prior_pt": 360.0
+  },
+  {
+   "date": "2026-07-14",
+   "firm": "Wells Fargo",
+   "to": "Underweight",
+   "from": "Underweight",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 130.0,
+   "prior_pt": 125.0
+  },
+  {
+   "date": "2026-07-13",
+   "firm": "Jefferies",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 400.0,
+   "prior_pt": 375.0
+  },
+  {
+   "date": "2026-07-09",
+   "firm": "UBS",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 442.0,
+   "prior_pt": 364.0
+  },
+  {
+   "date": "2026-07-09",
+   "firm": "Citizens",
+   "to": "Market Perform",
+   "from": "",
+   "action": "init",
+   "pt_action": "",
+   "pt": null,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-07-07",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 500.0,
+   "prior_pt": 475.0
+  },
+  {
+   "date": "2026-07-02",
+   "firm": "Freedom Broker",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 420.0,
+   "prior_pt": 400.0
+  },
+  {
+   "date": "2026-07-02",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 415.0,
+   "prior_pt": 415.0
+  },
+  {
+   "date": "2026-07-02",
+   "firm": "Truist Securities",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 430.0,
+   "prior_pt": 400.0
+  },
+  {
+   "date": "2026-06-12",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 24.86,
+   "prior_pt": 24.86
+  },
+  {
+   "date": "2026-06-05",
+   "firm": "JP Morgan",
+   "to": "Neutral",
+   "from": "Underweight",
+   "action": "up",
+   "pt_action": "Raises",
+   "pt": 475.0,
+   "prior_pt": 145.0
+  },
+  {
+   "date": "2026-06-04",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 490.0,
+   "prior_pt": 490.0
+  },
+  {
+   "date": "2026-04-23",
+   "firm": "UBS",
+   "to": "Neutral",
+   "from": "Neutral",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 364.0,
+   "prior_pt": 352.0
+  },
+  {
+   "date": "2026-04-23",
+   "firm": "Canaccord Genuity",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Raises",
+   "pt": 450.0,
+   "prior_pt": 420.0
+  },
+  {
+   "date": "2026-04-23",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 475.0,
+   "prior_pt": 480.0
+  },
+  {
+   "date": "2026-04-23",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 490.0,
+   "prior_pt": 490.0
+  },
+  {
+   "date": "2026-04-23",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 510.0,
+   "prior_pt": 510.0
+  },
+  {
+   "date": "2026-04-23",
+   "firm": "Wedbush",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 600.0,
+   "prior_pt": 600.0
+  },
+  {
+   "date": "2026-04-23",
+   "firm": "Mizuho",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 480.0,
+   "prior_pt": 540.0
+  },
+  {
+   "date": "2026-04-23",
+   "firm": "Needham",
+   "to": "Hold",
+   "from": "Hold",
+   "action": "reit",
+   "pt_action": "",
+   "pt": null,
+   "prior_pt": null
+  },
+  {
+   "date": "2026-04-22",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 510.0,
+   "prior_pt": 510.0
+  },
+  {
+   "date": "2026-04-21",
+   "firm": "Wedbush",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 600.0,
+   "prior_pt": 600.0
+  },
+  {
+   "date": "2026-04-15",
+   "firm": "TD Cowen",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 490.0,
+   "prior_pt": 519.0
+  },
+  {
+   "date": "2026-04-14",
+   "firm": "UBS",
+   "to": "Neutral",
+   "from": "Sell",
+   "action": "up",
+   "pt_action": "Maintains",
+   "pt": 352.0,
+   "prior_pt": 352.0
+  },
+  {
+   "date": "2026-04-06",
+   "firm": "Canaccord Genuity",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Maintains",
+   "pt": 420.0,
+   "prior_pt": 420.0
+  },
+  {
+   "date": "2026-04-06",
+   "firm": "Baird",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 538.0,
+   "prior_pt": 548.0
+  },
+  {
+   "date": "2026-03-31",
+   "firm": "Canaccord Genuity",
+   "to": "Buy",
+   "from": "Buy",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 420.0,
+   "prior_pt": 520.0
+  },
+  {
+   "date": "2026-03-30",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 24.86,
+   "prior_pt": 24.86
+  },
+  {
+   "date": "2026-03-27",
+   "firm": "Wedbush",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 600.0,
+   "prior_pt": 600.0
+  },
+  {
+   "date": "2026-03-12",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 25.28,
+   "prior_pt": 25.28
+  },
+  {
+   "date": "2026-02-19",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 25.28,
+   "prior_pt": 25.28
+  },
+  {
+   "date": "2026-01-30",
+   "firm": "JP Morgan",
+   "to": "Underweight",
+   "from": "Underweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 145.0,
+   "prior_pt": 150.0
+  },
+  {
+   "date": "2026-01-29",
+   "firm": "Morgan Stanley",
+   "to": "Equal-Weight",
+   "from": "Equal-Weight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 415.0,
+   "prior_pt": 425.0
+  },
+  {
+   "date": "2026-01-29",
+   "firm": "RBC Capital",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 500.0,
+   "prior_pt": 500.0
+  },
+  {
+   "date": "2026-01-29",
+   "firm": "Wedbush",
+   "to": "Outperform",
+   "from": "Outperform",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 600.0,
+   "prior_pt": 600.0
+  },
+  {
+   "date": "2026-01-29",
+   "firm": "Cantor Fitzgerald",
+   "to": "Overweight",
+   "from": "Overweight",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 510.0,
+   "prior_pt": 510.0
+  },
+  {
+   "date": "2026-01-29",
+   "firm": "Wells Fargo",
+   "to": "Underweight",
+   "from": "Underweight",
+   "action": "main",
+   "pt_action": "Lowers",
+   "pt": 125.0,
+   "prior_pt": 130.0
+  },
+  {
+   "date": "2026-01-29",
+   "firm": "GLJ Research",
+   "to": "Sell",
+   "from": "Sell",
+   "action": "reit",
+   "pt_action": "Maintains",
+   "pt": 25.28,
+   "prior_pt": 25.28
+  }
+ ],
+ "price_targets": {
+  "current": 391.812,
+  "high": 600.0,
+  "low": 128.11,
+  "mean": 412.47626,
+  "median": 436.0
+ },
+ "eps_trend": {
+  "0q": {
+   "current": 0.50008,
+   "7daysAgo": 0.48579,
+   "30daysAgo": 0.48331,
+   "60daysAgo": 0.48823,
+   "90daysAgo": 0.49515
+  },
+  "+1q": {
+   "current": 0.46,
+   "7daysAgo": 0.465,
+   "30daysAgo": 0.45755,
+   "60daysAgo": 0.45955,
+   "90daysAgo": 0.46323
+  },
+  "0y": {
+   "current": 1.72424,
+   "7daysAgo": 1.72424,
+   "30daysAgo": 1.73673,
+   "60daysAgo": 1.76564,
+   "90daysAgo": 1.77846
+  },
+  "+1y": {
+   "current": 2.15922,
+   "7daysAgo": 2.15922,
+   "30daysAgo": 2.24237,
+   "60daysAgo": 2.25195,
+   "90daysAgo": 2.2565
+  }
+ },
+ "eps_revisions": {
+  "0q": {
+   "upLast7days": 10.0,
+   "upLast30days": 11.0,
+   "downLast30days": 9.0,
+   "downLast7Days": 7.0
+  },
+  "+1q": {
+   "upLast7days": 4.0,
+   "upLast30days": 4.0,
+   "downLast30days": 4.0,
+   "downLast7Days": 3.0
+  },
+  "0y": {
+   "upLast7days": 13.0,
+   "upLast30days": 12.0,
+   "downLast30days": 16.0,
+   "downLast7Days": 14.0
+  },
+  "+1y": {
+   "upLast7days": 14.0,
+   "upLast30days": 11.0,
+   "downLast30days": 17.0,
+   "downLast7Days": 13.0
+  }
+ },
+ "growth": {
+  "0q": {
+   "stockTrend": 0.0002,
+   "indexTrend": 0.28959998
+  },
+  "+1q": {
+   "stockTrend": 0.122,
+   "indexTrend": 0.2711
+  },
+  "0y": {
+   "stockTrend": 0.0387,
+   "indexTrend": 0.33290002
+  },
+  "+1y": {
+   "stockTrend": 0.2523,
+   "indexTrend": 0.16690001
+  },
+  "LTG": {
+   "indexTrend": 0.122
+  }
+ },
+ "earnings_estimate": {
+  "0q": {
+   "avg": 0.50008,
+   "low": 0.34213,
+   "high": 0.88,
+   "yearAgoEps": 0.5,
+   "numberOfAnalysts": 27.0,
+   "growth": 0.0002
+  },
+  "+1q": {
+   "avg": 0.46,
+   "low": 0.28,
+   "high": 0.9,
+   "yearAgoEps": 0.41,
+   "numberOfAnalysts": 13.0,
+   "growth": 0.122
+  },
+  "0y": {
+   "avg": 1.72424,
+   "low": 1.17,
+   "high": 2.28,
+   "yearAgoEps": 1.66,
+   "numberOfAnalysts": 32.0,
+   "growth": 0.0387
+  },
+  "+1y": {
+   "avg": 2.15922,
+   "low": 1.03,
+   "high": 4.13,
+   "yearAgoEps": 1.72424,
+   "numberOfAnalysts": 32.0,
+   "growth": 0.2523
+  }
+ },
+ "recommendations": [
+  {
+   "period": "0m",
+   "strongBuy": 6,
+   "buy": 15,
+   "hold": 21,
+   "sell": 2,
+   "strongSell": 0
+  },
+  {
+   "period": "-1m",
+   "strongBuy": 5,
+   "buy": 15,
+   "hold": 22,
+   "sell": 2,
+   "strongSell": 0
+  },
+  {
+   "period": "-2m",
+   "strongBuy": 4,
+   "buy": 15,
+   "hold": 21,
+   "sell": 2,
+   "strongSell": 2
+  },
+  {
+   "period": "-3m",
+   "strongBuy": 6,
+   "buy": 16,
+   "hold": 20,
+   "sell": 3,
+   "strongSell": 2
+  }
+ ]
+}
