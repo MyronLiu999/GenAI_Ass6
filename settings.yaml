@@ -1,0 +1,54 @@
+# EquityDesk settings. Every tunable lives here; nothing below is hard-coded elsewhere.
+#
+# MODEL. Any of:
+#   provider: openai      name: gpt-4o            api_key_env: OPENAI_API_KEY
+#   provider: anthropic   name: claude-sonnet-5   api_key_env: ANTHROPIC_API_KEY
+#   provider: openai      name: <model>  base_url: <OpenAI-compatible endpoint>   (DeepSeek, Groq, Ollama, ...)
+#   provider: scripted    (offline, deterministic, free; used by tests and demo mode)
+# Every model named here needs a price line in pricing.yaml, or its cost shows as UNPRICED.
+model:
+  provider: openai
+  name: gpt-4o
+  temperature: 0.2
+  max_tokens: 2500
+  timeout_s: 90
+  max_retries: 3          # transient errors (429 / 5xx / timeouts), exponential backoff
+  api_key_env: OPENAI_API_KEY
+  base_url: null
+
+# Optional per-role overrides, merged onto `model`. Roles: analyst, debate, pm, qa.
+# Example: run the four analysts on a cheaper model and keep the PM on the strong one.
+roles: {}
+#  analyst: {name: gpt-4o-mini}
+
+# Hard ceilings enforced by the harness (equitydesk/harness/llm.py) before every call.
+budget:
+  run_token_ceiling: 150000
+  run_cost_ceiling_usd: 1.50
+  qa_token_ceiling: 60000      # per follow-up question
+
+graph:
+  debate_rounds: 2             # default bull/bear rounds
+  max_debate_rounds: 4         # hard cap; requests above it are clamped
+  max_revisions: 1             # PM rewrites allowed when the grounding check fails
+  language: English            # English | Chinese  (prose only; ids and tickers stay as-is)
+
+grounding:
+  max_ungrounded_numbers: 2    # in the PM decision; more than this fails the check
+  number_rel_tolerance: 0.03
+  hold_band_pct: 5.0           # track record: a HOLD is a hit if |excess return| <= this
+  min_days_to_score: 5         # calls younger than this are "too early" (memory and track record)
+
+data:
+  provider: yfinance           # yfinance | fixtures
+  fixtures_dir: fixtures
+  history_period: 2y
+  benchmark: SPY
+  cache_ttl_minutes: 30
+  news_limit: 10
+  staleness_days: 5            # last bar older than this many days -> warning in the report
+  risk_free_rate_pct: 4.0
+  atr_stop_multiple: 2.0
+
+paths:
+  data_dir: data               # cache, SQLite stores, run traces (git-ignored)

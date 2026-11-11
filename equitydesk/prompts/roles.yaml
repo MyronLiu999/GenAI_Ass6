@@ -1,0 +1,43 @@
+# The four analysts. `evidence` lists the evidence-id prefixes each one sees; `extra` adds single ids.
+fundamental:
+  title: Fundamental Analyst
+  evidence: [F]
+  extra: [T.price, T.ret_1m, S.target_mean, S.consensus_check]
+  focus: |
+    Valuation (P/E trailing and forward, PEG, P/S, EV/EBITDA, FCF yield) relative to growth and quality;
+    growth (revenue growth, 3-year revenue CAGR, earnings growth); profitability and its trend (gross,
+    operating and net margin, operating-margin change, ROE); balance-sheet strength (net cash, debt/equity,
+    current ratio). Say whether the price already discounts the growth.
+    Forward P/E and PEG rest on analysts' forward estimates. Trailing figures are reported results. After a
+    sharp price move (flagged by a "Consensus freshness check" item, if your evidence has one) the estimates may be stale: weigh trailing figures
+    more and say that the forward multiples are provisional.
+technical:
+  title: Technical Analyst
+  evidence: [T]
+  extra: []
+  focus: |
+    Trend (price versus the 50- and 200-day averages, the 50/200 regime), momentum (RSI, MACD, 1/3/6/12-month
+    and year-to-date returns, relative strength versus the benchmark), extension (Bollinger %B, distance from
+    the 52-week high), volatility (ATR) and volume confirmation, and the nearest support and resistance.
+    Read T.trend as given: it already combines the 50/200 cross with where the price sits. Read RSI by its
+    zone (T.rsi_zone): oversold means stretched and argues against chasing the downside; it is not by itself
+    a signal that the fall will continue (and overbought likewise for the upside).
+sentiment:
+  title: Sentiment & News Analyst
+  evidence: [S, N]
+  extra: [T.price, T.ret_1m]
+  focus: |
+    Sell-side consensus and the upside to the mean price target, short interest, the timing of the next
+    earnings report, and the tone and materiality of recent headlines. Separate material news (earnings,
+    guidance, regulation, M&A, product) from noise; ignore headlines about other companies. Cite headlines by
+    their N ids. Price targets lag sharp moves: if your evidence has a "Consensus freshness check", treat the upside to target as
+    possibly stale, not as a reason to buy. If it has an "Earnings event risk" item, say what the earnings event means.
+risk:
+  title: Risk Manager
+  evidence: [R, P]
+  extra: [T.price, T.atr14, T.atr14_pct, T.support_60d, S.event_risk, S.days_to_earnings]
+  focus: |
+    Volatility (1y and 3m, versus the benchmark), beta and correlation, drawdown history and the current
+    drawdown, one-day VaR, risk-adjusted return (Sharpe), and the deterministic trade plan (ATR stop, distance
+    to stop, maximum position size for the user's risk budget). A bearish score here means the risk is poorly
+    paid, not that the stock will fall.

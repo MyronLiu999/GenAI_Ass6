@@ -1,0 +1,15 @@
+# Price sheet: USD per million tokens. Every cost EquityDesk reports is computed from this file.
+# Prices are perishable; re-verify against the vendor page and update `read` when you do.
+# A served model name matches the longest line it starts with (gpt-4o-2024-08-06 -> gpt-4o).
+# A model with no matching line is reported as UNPRICED and counted as $0.
+#
+# Rows copied from the course price sheet (AgenticEngineering W5 pricing.yaml).
+
+models:
+  gpt-4o:            {input: 2.50, output: 10.00, cache_read: 1.25, source: "https://developers.openai.com/api/docs/pricing", read: 2026-11-05}
+  gpt-4o-mini:       {input: 0.15, output: 0.60,  cache_read: 0.075, source: "https://developers.openai.com/api/docs/pricing", read: 2026-11-05}
+  claude-opus-5:     {input: 5.00, output: 25.00, cache_read: 0.50, source: "https://platform.claude.com/docs/en/about-claude/pricing", read: 2026-06-24}
+  claude-sonnet-5:   {input: 2.00, output: 10.00, cache_read: 0.20, source: "https://platform.claude.com/docs/en/about-claude/pricing", read: 2026-06-24}
+  claude-haiku-5-5:  {input: 0.10, output: 0.50,  cache_read: 0.01, source: "https://platform.claude.com/docs/en/about-claude/pricing", read: 2026-10-11}
+  gemini-3.5-flash-lite: {input: 0.30, output: 2.50, cache_read: 0.03, source: "https://ai.google.dev/gemini-api/docs/pricing", read: 2026-10-11}
+  scripted:          {input: 0.00, output: 0.00, source: "offline scripted model", read: 2026-11-11}
