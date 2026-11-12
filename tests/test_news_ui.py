@@ -109,3 +109,29 @@ def test_publish_time_is_shown_and_date_only_rows_upgrade(tmp_path):
     store.track_news("DEMO", [{**item, "published": "2026-11-11"}])
     rows = store.track_news("DEMO", [{**item, "published": "2026-11-11T14:05:00Z"}])
     assert rows[0]["published"] == "2026-11-11T14:05:00Z"
+
+
+def test_triage_runs_one_ticker_per_call_and_names_the_company(settings, tmp_path):
+    """Live failure: in a mixed batch dominated by Nvidia headlines, an Amazon headline was judged 'not Nvidia'."""
+    from equitydesk.harness.llm import ScriptedBackend
+
+    class Recording(ScriptedBackend):
+        def __init__(self):
+            super().__init__()
+            self.systems = []
+
+        def structured(self, schema, messages):
+            self.systems.append(messages[0].content)
+            return super().structured(schema, messages)
+
+    store = Store(tmp_path / "d.db")
+    rows = []
+    for t, name, titles in (("NVDA", "NVIDIA Corporation", ["Nvidia A", "Nvidia B"]),
+                            ("AMZN", "Amazon.com, Inc.", ["Amazon could face trial in Italy"])):
+        rows += [{**r, "company": name} for r in
+                 store.track_news(t, [{"title": x, "url": f"https://a.com/{x}", "about": True} for x in titles])]
+    b = Recording()
+    assert triage(settings, store, rows, backend_factory=lambda cfg: b)["triaged"] == 3
+    assert len(b.systems) == 2
+    assert "feed of NVDA (NVIDIA Corporation)" in b.systems[0] and "Amazon" not in b.systems[0]
+    assert "feed of AMZN (Amazon.com, Inc.)" in b.systems[1] and "NVIDIA" not in b.systems[1]
