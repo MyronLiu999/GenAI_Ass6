@@ -26,13 +26,39 @@ def gbm(seed: int, n: int, start: float, drift: float, vol: float) -> pd.DataFra
 
 
 def write(root: Path, ticker: str, hist: pd.DataFrame, info: dict, news: list, income: dict | None = None,
-          cashflow: dict | None = None, calendar: dict | None = None, street: dict | None = None) -> None:
+          cashflow: dict | None = None, calendar: dict | None = None, street: dict | None = None,
+          earnings: dict | None = None) -> None:
     d = root / ticker
     d.mkdir(parents=True, exist_ok=True)
     hist.round(4).to_csv(d / "history.csv")
     for name, obj in (("info", info), ("news", news), ("income", income or {}), ("cashflow", cashflow or {}),
-                      ("calendar", calendar or {}), ("street", street or {})):
+                      ("calendar", calendar or {}), ("street", street or {}), ("earnings", earnings or {})):
         (d / f"{name}.json").write_text(json.dumps(obj, indent=1), encoding="utf-8")
+
+
+# Five quarters, newest first: revenue +10% QoQ on average, receivables jumping 40% in the last quarter, and
+# next-quarter consensus asking for only +4% (a low bar). Quarter 3 back (index 3) = the year-ago quarter of 0q.
+EARNINGS = {
+    "beats": [{"date": d, "eps_est": 1.0, "eps_actual": 1.05, "surprise_pct": 5.0}
+              for d in ("2026-10-28", "2026-07-29", "2026-04-29", "2026-01-28")],
+    "rev_est": {"0q": {"avg": 15.6e9, "low": 15.0e9, "high": 16.5e9, "numberOfAnalysts": 20,
+                       "yearAgoRevenue": 11.0e9, "growth": 0.418},
+                "+1y": {"avg": 70e9, "low": 60e9, "high": 80e9, "growth": 0.25}},
+    "eps_est": {"0q": {"avg": 1.10, "low": 1.0, "high": 1.2, "yearAgoEps": 0.9},
+                "+1y": {"avg": 5.0, "low": 4.5, "high": 5.5}},
+    "quarters": [
+        {"period": "2026-09-30", "revenue": 15.0e9, "gross_profit": 9.0e9, "operating_income": 4.5e9,
+         "net_income": 3.6e9, "receivables": 7.0e9, "inventory": 2.0e9, "fcf": 1.8e9, "capex": -0.5e9},
+        {"period": "2026-06-30", "revenue": 13.6e9, "gross_profit": 8.0e9, "operating_income": 4.0e9,
+         "net_income": 3.2e9, "receivables": 5.0e9, "inventory": 1.9e9, "fcf": 2.9e9, "capex": -0.5e9},
+        {"period": "2026-03-31", "revenue": 12.4e9, "gross_profit": 7.2e9, "operating_income": 3.6e9,
+         "net_income": 2.9e9, "receivables": 4.6e9, "inventory": 1.8e9, "fcf": 2.7e9, "capex": -0.4e9},
+        {"period": "2025-12-31", "revenue": 11.0e9, "gross_profit": 6.3e9, "operating_income": 3.1e9,
+         "net_income": 2.5e9, "receivables": 4.0e9, "inventory": 1.7e9, "fcf": 2.4e9, "capex": -0.4e9},
+        {"period": "2025-09-30", "revenue": 10.2e9, "gross_profit": 5.8e9, "operating_income": 2.8e9,
+         "net_income": 2.3e9, "receivables": 3.7e9, "inventory": 1.6e9, "fcf": 2.2e9, "capex": -0.3e9},
+    ],
+}
 
 
 def main(out: Path) -> None:
@@ -85,7 +111,7 @@ def main(out: Path) -> None:
         "recommendations": [{"period": "0m", "strongBuy": 6, "buy": 12, "hold": 5, "sell": 1, "strongSell": 0},
                             {"period": "-3m", "strongBuy": 7, "buy": 13, "hold": 3, "sell": 1, "strongSell": 0}],
     }
-    write(out, "DEMO", demo, info, news, income, cashflow, {"next_earnings": "2027-02-10"}, street)
+    write(out, "DEMO", demo, info, news, income, cashflow, {"next_earnings": "2027-02-10"}, street, EARNINGS)
     write(out, "FLAT", gbm(3, 40, 20.0, 0.0, 0.2), {"longName": "Thin History Inc.", "quoteType": "EQUITY"}, [])
     print(f"wrote DEMO, FLAT, SPY fixtures under {out}")
 

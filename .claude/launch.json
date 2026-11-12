@@ -6,6 +6,12 @@
       "runtimeExecutable": ".venv/Scripts/streamlit.exe",
       "runtimeArgs": ["run", "app.py", "--server.port", "8501", "--server.headless", "true", "--browser.gatherUsageStats", "false"],
       "port": 8501
+    },
+    {
+      "name": "equitydesk-alt",
+      "runtimeExecutable": ".venv/Scripts/streamlit.exe",
+      "runtimeArgs": ["run", "app.py", "--server.port", "8502", "--server.headless", "true", "--browser.gatherUsageStats", "false"],
+      "port": 8502
     }
   ]
 }

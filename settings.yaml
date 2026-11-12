@@ -16,14 +16,21 @@ model:
   api_key_env: OPENAI_API_KEY
   base_url: null
 
-# Optional per-role overrides, merged onto `model`. Roles: analyst, debate, pm, qa, research.
-# Example: run the four analysts on a cheaper model and keep the PM on the strong one.
-roles: {}
-#  analyst: {name: gpt-4o-mini}
+# Per-role overrides, merged onto `model`. Roles: analyst, debate, pm, qa, research. A single analyst node
+# (fundamental, technical, sentiment, risk, street, earnings) can be overridden by its own name.
+# Reasoning models (gpt-5.x, o3) take no temperature and spend output tokens thinking: give them
+# reasoning_effort and a larger max_tokens.
+# Why these two: in a side-by-side NVDA run (2026-11-11) a gpt-4o PM restated figures and failed the stale-
+# estimate check, while a gpt-5.5 PM argued the earnings bar, guidance and earnings quality and passed; the
+# gpt-4o earnings analyst misread $108B guidance as above a $109.0B consensus. Cost: about $0.45 -> $0.80 a run.
+# For the cheaper all-gpt-4o desk, replace this block with `roles: {}`.
+roles:
+  pm: {name: gpt-5.5, temperature: null, reasoning_effort: medium, max_tokens: 16000, timeout_s: 300}
+  earnings: {name: gpt-5.5, temperature: null, reasoning_effort: medium, max_tokens: 12000, timeout_s: 240}
 
 # Hard ceilings enforced by the harness (equitydesk/harness/llm.py) before every call.
 budget:
-  run_token_ceiling: 150000
+  run_token_ceiling: 250000
   run_cost_ceiling_usd: 1.50
   qa_token_ceiling: 60000      # per follow-up question
 

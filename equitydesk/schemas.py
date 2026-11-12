@@ -54,6 +54,40 @@ class StreetReport(AnalystReport):
     key_debates: list[str] = Field(description="The two or three questions the street is divided on.")
 
 
+class EarningsReport(AnalystReport):
+    """The earnings and demand analyst: the bar for the next report, the demand behind it, earnings quality."""
+
+    setup_call: Literal["beat likely", "in line", "miss risk", "no data"] = Field(description=(
+        "Your call on the next report against the consensus, from the bar (E.q_bar), the beat record, guidance "
+        "and the demand drivers."))
+    setup_view: str = Field(description=(
+        "Two or three sentences: what the consensus asks for against what the company has been delivering and "
+        "guiding, what the demand data implies, and so what you expect, with citations."))
+    demand_drivers: list[Point] = Field(default_factory=list, description=(
+        "The quantified demand and supply drivers (customer spending, market size, guidance, capacity), each "
+        "with its figure and what it implies for this company's revenue, cited (D/E/Q ids)."))
+    quality_flags: list[Point] = Field(default_factory=list, description=(
+        "Earnings-quality issues the headline numbers hide (receivables, inventory, cash conversion, "
+        "non-operating gains), cited Q ids; empty if none."))
+
+
+class DriverItem(BaseModel):
+    source_ids: list[str] = Field(description="The [S<n>] markers this figure comes from. Required.")
+    source: str = Field(description="Who published or stated the figure (company, firm, outlet).")
+    date: str = Field(description="YYYY-MM-DD if known, else the best available date.")
+    kind: Literal["company guidance", "customer spending", "market size", "supply and capacity", "pricing",
+                  "competition", "expectations", "regulation", "other"]
+    metric: str = Field(description="What is measured, e.g. 'Combined 2026 capex guidance of the four largest "
+                                    "US cloud providers'.")
+    figure: str = Field(description="The figure exactly as the source states it, e.g. '$400 billion' or '+30%'.")
+    period: str = Field(default="", description="The period it refers to, e.g. 'calendar 2026'.")
+    context: str = Field(default="", description="One sentence: why the source says it matters for the company.")
+
+
+class DriverNotes(BaseModel):
+    items: list[DriverItem]
+
+
 class ResearchNote(BaseModel):
     source_ids: list[str] = Field(description="The [S<n>] markers this note comes from. Required; notes without "
                                               "one are discarded.")
@@ -77,7 +111,8 @@ class NewsTriage(BaseModel):
     items: list[HeadlineView]
 
 
-SCHEMAS = {"AnalystReport": AnalystReport, "SentimentReport": SentimentReport, "StreetReport": StreetReport}
+SCHEMAS = {"AnalystReport": AnalystReport, "SentimentReport": SentimentReport, "StreetReport": StreetReport,
+           "EarningsReport": EarningsReport}
 
 
 class DebateTurn(BaseModel):
@@ -95,7 +130,10 @@ class Decision(BaseModel):
     conviction: int = Field(ge=0, le=100)
     horizon_months: int = Field(ge=1, le=24)
     thesis: str = Field(description="The investment thesis in three to five sentences, with citations.")
-    drivers: list[Point] = Field(description="Two to five reasons for the rating, each cited.")
+    drivers: list[Point] = Field(description=(
+        "Two to five reasons for the rating, ranked. Each is an inference, not a restatement: it connects at least "
+        "two facts from different categories (for example the consensus bar [E] against the run-rate [Q], or "
+        "customer spending [D] against next-year estimates [E]) and says what that means for the stock."))
     risks: list[Point] = Field(description="Two to five risks to the thesis, each cited.")
     catalysts: list[str] = Field(default_factory=list, description="Upcoming events that could move the stock.")
     invalidation: list[str] = Field(min_length=2, description=(
@@ -107,6 +145,10 @@ class Decision(BaseModel):
     override_rationale: str = Field(default="", description="Required when the rating departs from the analysts' consensus.")
     key_debates: list[str] = Field(min_length=1, description=(
         "The two or three questions the outcome hinges on, each with the side you take and why, cited."))
+    expectations_gap: str = Field(default="", description=(
+        "What the street expects for the next report and next year against what the run-rate, the beat record, "
+        "guidance and the demand drivers imply (cite E/Q/D ids); your call (beat, in line or miss) and what "
+        "the stock does if you are right."))
     variant_view: str = Field(min_length=10, description=(
         "Where this call differs from the street (cite A/W ids) and why the street may be wrong; or, if you agree "
         "with the street, what you see that it does not price in."))

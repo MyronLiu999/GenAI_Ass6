@@ -1,9 +1,9 @@
-# The five analysts. `evidence` lists the evidence-id prefixes each one sees; `extra` adds single ids;
+# The six analysts. `evidence` lists the evidence-id prefixes each one sees; `extra` adds single ids;
 # `schema` names the output schema in equitydesk/schemas.py (default AnalystReport).
 fundamental:
   title: Fundamental Analyst
   evidence: [F]
-  extra: [T.price, T.ret_1m, S.target_mean, S.consensus_check]
+  extra: [T.price, T.ret_1m, S.target_mean, S.consensus_check, Q.rev_qoq_path, Q.gm_change, Q.om_change, E.pe_ny]
   focus: |
     Valuation (P/E trailing and forward, PEG, P/S, EV/EBITDA, FCF yield) relative to growth and quality;
     growth (revenue growth, 3-year revenue CAGR, earnings growth); profitability and its trend (gross,
@@ -12,6 +12,9 @@ fundamental:
     Forward P/E and PEG rest on analysts' forward estimates. Trailing figures are reported results. After a
     sharp price move (flagged by a "Consensus freshness check" item, if your evidence has one) the estimates may be stale: weigh trailing figures
     more and say that the forward multiples are provisional.
+    Judge direction, not level: everyone already knows growth is high or the margin is wide. What matters is
+    whether growth is accelerating or decelerating (Q.rev_qoq_path), whether margins are still expanding
+    (Q.gm_change, Q.om_change), and what multiple the market pays for next year's earnings (E.pe_ny).
 technical:
   title: Technical Analyst
   evidence: [T]
@@ -45,6 +48,30 @@ risk:
     drawdown, one-day VaR, risk-adjusted return (Sharpe), and the deterministic trade plan (ATR stop, distance
     to stop, maximum position size for the user's risk budget). A bearish score here means the risk is poorly
     paid, not that the stock will fall.
+earnings:
+  title: Earnings & Demand Analyst
+  schema: EarningsReport
+  evidence: [E, Q, D]
+  extra: [T.price, T.ret_1m, S.next_earnings, S.days_to_earnings, A.eps_ny_rev_30d, A.eps_cy_rev_90d,
+          A.eps_ny_up_30d, A.eps_ny_down_30d]
+  focus: |
+    You decide whether the next report beats the consensus and whether next year's numbers are too high or too
+    low. Work like a buy-side earnings analyst, from comparisons, not from levels:
+    1. The bar. E.q_bar sets the growth the consensus asks for against what the company has delivered. A
+       consensus below the run-rate, with a long beat record (E.beat_record, E.surprise_avg_4q), is a low bar;
+       one above the run-rate is a high bar. If a D item gives the company's own guidance, compare the
+       consensus with it: a consensus well above guidance means the street already expects a beat.
+    2. The demand behind the numbers. Use the D items (customers' spending plans, market size, capacity,
+       pricing): name their figures and set them against what the street expects (E.ny_rev_cons,
+       E.ny_rev_growth, E.ny_rev_vs_run_rate). Does customer spending support that growth, or does the
+       out-year need more than the customers are guiding to?
+    3. Earnings quality. Q.quality_flags, days sales outstanding (Q.dso_last against Q.dso_then), days of
+       inventory, free-cash-flow conversion, non-operating gains: are reported earnings as good as they look?
+       Receivables or inventory growing much faster than sales is the classic early warning.
+    4. Dispersion. A wide spread of next-year estimates (E.ny_rev_dispersion, E.ny_eps_dispersion) means the
+       debate is about the out-year, not the quarter: say which side you take.
+    Give `setup_call`, lead with the single most decision-relevant comparison, and say what would prove you
+    wrong. If there are no D items, say that the demand view rests on reported and consensus figures only.
 street:
   title: Street Research Analyst
   schema: StreetReport

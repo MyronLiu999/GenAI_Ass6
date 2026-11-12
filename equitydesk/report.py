@@ -47,6 +47,8 @@ def render_markdown(r: dict) -> str:
     lines += [f"## Rating: **{RATING_LABEL[d['rating']]}** · conviction {d['conviction']}/100 · horizon "
               f"{d['horizon_months']} months", "", f"Last close {fmt(r.get('price'), '$')}.", "",
               "### Thesis", d["thesis"], ""]
+    if d.get("expectations_gap"):
+        lines += ["### Expectations gap (the next report and next year)", d["expectations_gap"], ""]
     if d.get("variant_view"):
         lines += ["### Variant view (versus the street)", d["variant_view"], ""]
     if d.get("key_debates"):
@@ -73,6 +75,26 @@ def render_markdown(r: dict) -> str:
     street = (r.get("analysts") or {}).get("street") or {}
     research = r.get("research") or {}
     actions = [f for fid, f in facts.items() if fid.startswith("A.action_")]
+    earn = (r.get("analysts") or {}).get("earnings") or {}
+    if earn.get("setup_view") or research.get("drivers") or "E.q_bar" in facts:
+        lines += ["## Earnings set-up and demand", ""]
+        for fid in ("E.q_bar", "E.beat_record", "Q.rev_qoq_path", "E.ny_rev_vs_run_rate", "Q.quality_flags"):
+            if fid in facts:
+                lines.append(f"- {facts[fid].label}: {facts[fid].display()} [{fid}]")
+        lines.append("")
+        if earn.get("setup_view"):
+            lines += [f"**Earnings analyst: {earn.get('setup_call', '')}.** {earn['setup_view']}", ""]
+        if earn.get("demand_drivers"):
+            lines += ["**Demand drivers**", *_points(earn["demand_drivers"]), ""]
+        if earn.get("quality_flags"):
+            lines += ["**Earnings quality**", *_points(earn["quality_flags"]), ""]
+        if research.get("drivers"):
+            lines.append(f"**Industry and demand data found on the web** ({len(research['drivers'])} with verified sources)")
+            for x in research["drivers"]:
+                lines.append(f"- **{x.get('metric', '')}**: {x.get('figure', '')}"
+                             + (f" ({x['period']})" if x.get("period") else "")
+                             + f" — {x.get('source', '')}, {x.get('date', '')} [source]({x['url']}) [{x.get('fact_id', '')}]")
+            lines.append("")
     if street.get("consensus_view") or actions or research.get("notes"):
         lines += ["## Street research", ""]
         if street.get("consensus_view"):
@@ -103,7 +125,7 @@ def render_markdown(r: dict) -> str:
         lines.append("")
     lines += ["## Analyst views", ""]
     titles = {"fundamental": "Fundamental", "technical": "Technical", "sentiment": "Sentiment & News", "risk": "Risk",
-              "street": "Street research"}
+              "street": "Street research", "earnings": "Earnings & demand"}
     for name, rep in (r.get("analysts") or {}).items():
         if rep.get("failed"):
             lines += [f"### {titles.get(name, name)}: failed", rep.get("error", ""), ""]

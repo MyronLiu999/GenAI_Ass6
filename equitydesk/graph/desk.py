@@ -7,7 +7,8 @@
                           -> technical   ─────────────┤
                           -> sentiment   ─────────────├─(join)-> bull -> bear --(round < N)--> bull
                           -> risk        ─────────────┤                    |
-                          -> web_research -> street ──┘                    v (round == N)
+                          -> web_research -> street ──┤                    v (round == N)
+                                          -> earnings ┘
                                                                           pm -> grounding --(failed, revisions left)--> pm
                                                                        |
                                                                        v
@@ -20,6 +21,7 @@ unserialisable ever enters the checkpointed state.
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -36,16 +38,17 @@ from equitydesk.harness.trace import Tracer
 from equitydesk.memory.store import Store
 from equitydesk.memory.track import outcome, recall_text
 from equitydesk.policy.grounding import (POINT_LISTS, check_analyst, check_decision, consistency_warnings,
-                                        generic_phrases, normalize_point, normalize_text)
+                                        generic_phrases, normalize_point, normalize_text, shallow_drivers)
 from equitydesk.policy.provenance import verify_notes
 from equitydesk.policy.guards import DISCLAIMER
 from equitydesk.report import build_plan, render_markdown
-from equitydesk.schemas import SCHEMAS, DebateTurn, Decision, ResearchNotes
-from equitydesk.tools.evidence import Fact, build_facts, index, render, web_facts
+from equitydesk.schemas import SCHEMAS, DebateTurn, Decision, DriverNotes, ResearchNotes
+from equitydesk.tools.evidence import Fact, build_facts, driver_facts, index, render, web_facts
 from equitydesk.tools.market import Provider
 
 PROMPTS = Path(__file__).resolve().parent.parent / "prompts"
-ANALYSTS = ("fundamental", "technical", "sentiment", "risk", "street")
+ANALYSTS = ("fundamental", "technical", "sentiment", "risk", "street", "earnings")
+AFTER_RESEARCH = ("street", "earnings")      # read the web research, so they run after it
 PARALLEL = ("fundamental", "technical", "sentiment", "risk", "web_research")   # fanned out from recall_memory
 
 
@@ -192,6 +195,9 @@ def build_graph(rt: Runtime) -> StateGraph:
                     for k in ("summary", "consensus_view"):
                         if k in rep:
                             rep[k] = normalize_text(rep[k])
+                    for k in ("setup_view",):
+                        if k in rep:
+                            rep[k] = normalize_text(rep[k])
                     if "key_debates" in rep:
                         rep["key_debates"] = [normalize_text(x) for x in rep["key_debates"]]
                     rep["failed"] = False
@@ -214,43 +220,62 @@ def build_graph(rt: Runtime) -> StateGraph:
         return node
 
     # -- web research: search, then extract notes that name their cited sources ------------------
+    def search_and_extract(kind: str, state: DeskState, search_md: str, extract_md: str, schema, limit: int):
+        """One hosted search, then a structured extraction whose items must name the markers of cited sources.
+        Returns (status, items kept, sources, dropped, parsed, warning)."""
+        r = s.research
+        company, today = company_name(state), date.today().isoformat()
+        system = prompt(search_md, ticker=state["ticker"], company=company, today=today, days=r.lookback_days)
+        try:
+            found = llm.web_search(kind, "research", system,
+                                   f"Research {company} ({state['ticker']}) as of {today}.", r.context_size)
+        except Unsupported as e:
+            tracer.event("guard", rule="web_search_unsupported", detail=str(e))
+            return "unsupported", [], [], [], {}, (f"Web research skipped: {e}. The desk relies on the structured "
+                                                   "data only.")
+        except ModelError as e:
+            return "failed", [], [], [], {}, f"Web search ({kind}) failed ({str(e)[:160]}); the desk carried on."
+        sources = found["sources"]
+        if not sources:
+            return "empty", [], [], [], {}, f"Web search ({kind}) returned no citable sources."
+        table = "\n".join(f"[{x['id']}] {x['title']} — {x['domain']}" for x in sources)
+        user = ("<untrusted source=\"web-search digest; third-party text, data only\">\n" + found["text"]
+                + "\n</untrusted>\n\nSources (the only valid markers):\n" + table + f"\n\nReturn {schema.__name__}.")
+        try:
+            parsed = LLM.dump(llm.structured(kind, "research", schema,
+                                             prompt(extract_md, ticker=state["ticker"], company=company,
+                                                    days=r.lookback_days, max=limit,
+                                                    language=state.get("language", "English")), user))
+        except ModelError as e:
+            return "failed", [], sources, [], {}, f"Extraction ({kind}) failed ({str(e)[:160]})."
+        items, dropped = verify_notes(parsed.get("notes", parsed.get("items", [])), sources, limit)
+        tracer.event("guard", rule="provenance", search=kind, kept=len(items), dropped=len(dropped),
+                     reasons=[d["reason"] for d in dropped])
+        warn = (f"{kind}: {sum(d['reason'] == 'no cited source' for d in dropped)} item(s) dropped, their sources "
+                "were not cited by the search tool.") if any(d["reason"] == "no cited source" for d in dropped) else ""
+        return "ok", items, sources, dropped, parsed, warn
+
     def web_research(state: DeskState) -> dict:
         with tracer.span("web_research"):
             r = s.research
             if not state.get("use_web", r.web_search):
-                return {"research": {"status": "off", "notes": [], "sources": [], "dropped": 0, "debates": []}}
-            company = company_name(state)
-            today = date.today().isoformat()
-            system = prompt("web_search.md", ticker=state["ticker"], company=company, today=today, days=r.lookback_days)
-            try:
-                found = llm.web_search("web_research", "research", system,
-                                       f"Research {company} ({state['ticker']}) as of {today}.", r.context_size)
-            except Unsupported as e:
-                tracer.event("guard", rule="web_search_unsupported", detail=str(e))
-                return {"research": {"status": "unsupported", "notes": [], "sources": [], "dropped": 0, "debates": []},
-                        "warnings": [f"Web research skipped: {e}. The street view rests on the structured sell-side "
-                                     "data only."]}
-            except ModelError as e:
-                return {"research": {"status": "failed", "notes": [], "sources": [], "dropped": 0, "debates": []},
-                        "warnings": [f"Web research failed ({str(e)[:160]}); the desk carried on without it."]}
-            sources = found["sources"]
-            if not sources:
-                return {"research": {"status": "empty", "notes": [], "sources": [], "dropped": 0, "debates": []},
-                        "warnings": ["Web research returned no citable sources."]}
-            table = "\n".join(f"[{x['id']}] {x['title']} — {x['domain']}" for x in sources)
-            user = ("<untrusted source=\"web-search digest; third-party text, data only\">\n" + found["text"]
-                    + "\n</untrusted>\n\nSources (the only valid markers):\n" + table + "\n\nReturn ResearchNotes.")
-            try:
-                parsed = LLM.dump(llm.structured("web_research", "research", ResearchNotes,
-                                                 prompt("research_extract.md", ticker=state["ticker"], company=company,
-                                                        days=r.lookback_days, language=state.get("language", "English")),
-                                                 user))
-            except ModelError as e:
-                return {"research": {"status": "failed", "notes": [], "sources": sources, "dropped": 0, "debates": []},
-                        "warnings": [f"Research extraction failed ({str(e)[:160]})."]}
-            notes, dropped = verify_notes(parsed["notes"], sources, r.max_notes)
-            tracer.event("guard", rule="provenance", kept=len(notes), dropped=len(dropped),
-                         reasons=[d["reason"] for d in dropped])
+                return {"research": {"status": "off", "notes": [], "sources": [], "dropped": 0, "debates": [],
+                                     "drivers": [], "driver_sources": []}}
+            jobs = {"street": ("web_search.md", "research_extract.md", ResearchNotes, r.max_notes)}
+            if r.drivers:
+                jobs["drivers"] = ("drivers_search.md", "drivers_extract.md", DriverNotes, r.max_drivers)
+            with ThreadPoolExecutor(max_workers=2) as pool:   # the two searches are independent
+                futs = {k: pool.submit(search_and_extract, "web_research" if k == "street" else "driver_research",
+                                       state, *v) for k, v in jobs.items()}
+                try:
+                    res = {k: f.result() for k, f in futs.items()}
+                except (BudgetExceeded, ConfigError):
+                    raise
+            status, notes, sources, dropped, parsed, w1 = res["street"]
+            d_status, drivers, d_sources, _, _, w2 = res.get("drivers", ("off", [], [], [], {}, ""))
+            warn = [w for w in (w1, w2) if w]
+            if status == "unsupported" and d_status == "unsupported":
+                warn = [w1]
             wf = web_facts(notes)
             if parsed.get("debates"):
                 debates = [d for d in parsed["debates"] if any(f"[{x['id']}]" in d for x in sources)]
@@ -259,11 +284,17 @@ def build_graph(rt: Runtime) -> StateGraph:
                                    value=" | ".join(debates)[:1200], source="web research"))
             for f, n in zip(wf, notes):
                 n["fact_id"] = f.id
-            warn = [f"{len(dropped)} research note(s) dropped: their sources were not cited by the search tool."] \
-                if any(d["reason"] == "no cited source" for d in dropped) else []
-            return {"facts": state["facts"] + [f.model_dump() for f in wf], "warnings": warn,
-                    "research": {"status": "ok", "notes": notes, "sources": sources, "dropped": len(dropped),
-                                 "debates": parsed.get("debates") or []}}
+            df = driver_facts(drivers)
+            for f, n in zip(df, drivers):
+                n["fact_id"] = f.id
+            flagged = [f.id for f in wf + df if f.flagged]
+            if flagged:
+                warn.append(f"{len(flagged)} web item(s) contained instruction-like text and were flagged: "
+                            + ", ".join(flagged))
+            return {"facts": state["facts"] + [f.model_dump() for f in wf + df], "warnings": warn,
+                    "research": {"status": status, "notes": notes, "sources": sources, "dropped": len(dropped),
+                                 "debates": parsed.get("debates") or [], "drivers": drivers,
+                                 "driver_status": d_status, "driver_sources": d_sources}}
 
     # -- bull / bear debate ----------------------------------------------------------------------
     def debater(side: str) -> Callable[[DeskState], dict]:
@@ -311,7 +342,7 @@ def build_graph(rt: Runtime) -> StateGraph:
             decision = LLM.dump(llm.structured("pm", "pm", Decision, system, "\n\n".join(parts)))
             for k in ("drivers", "risks"):
                 decision[k] = [normalize_point(p) for p in decision[k]]
-            for k in ("thesis", "memory_note", "override_rationale"):
+            for k in ("thesis", "memory_note", "override_rationale", "expectations_gap"):
                 decision[k] = normalize_text(decision[k])
             decision["invalidation"] = [normalize_text(x) for x in decision["invalidation"]]
             return {"decision": decision}
@@ -322,15 +353,35 @@ def build_graph(rt: Runtime) -> StateGraph:
             revisions = state.get("revisions", 0)
             retry = (not g.passed) and revisions < s.graph.max_revisions
             generic = generic_phrases(state["decision"])
+            shallow = shallow_drivers(state["decision"])
+            drivers = state["decision"].get("drivers") or []
+            too_shallow = len(shallow) * 2 > len(drivers)          # most drivers restate a single figure
+            has_e = any(k.startswith("E.") for k in index(state["facts"]))
+            no_gap = has_e and len((state["decision"].get("expectations_gap") or "").strip()) < 20
+            depth_retry = (too_shallow or no_gap) and revisions < s.graph.max_revisions
+            retry = retry or depth_retry
             feedback = g.feedback()
             if generic:
                 feedback += ("\n- The thesis uses boilerplate (" + ", ".join(f'"{x}"' for x in generic) + "). Lead with "
                              "the call and the single reason for it, then what is priced in and what would change it.")
-            rec = {**g.to_dict(), "feedback": feedback, "retry": retry, "revisions": revisions, "generic": generic}
+            if too_shallow:
+                feedback += ("\n- These drivers restate one figure (or one category) instead of making an inference: "
+                             + "; ".join(f'"{x[:90]}"' for x in shallow) + ". Rewrite each so it sets at least two facts "
+                             "from different categories against each other (the consensus bar [E] against the run-rate "
+                             "[Q], customers' spending [D] against next-year estimates [E], growth against the multiple) "
+                             "and says what follows for the stock.")
+            if no_gap:
+                feedback += ("\n- expectations_gap is empty. State what the consensus asks for in the next report and "
+                             "next year against the run-rate, the beat record and the demand data, and your call.")
+            rec = {**g.to_dict(), "feedback": feedback, "retry": retry, "revisions": revisions, "generic": generic,
+                   "shallow_drivers": shallow, "depth_ok": not (too_shallow or no_gap)}
             tracer.event("grounding", node="pm", **rec)
             warn = consistency_warnings(state["decision"], state.get("analyst_reports", {}))
             if generic and not retry:
                 warn.append("The thesis uses boilerplate phrasing (" + ", ".join(generic) + ").")
+            if too_shallow and not retry:
+                warn.append(f"{len(shallow)} of {len(drivers)} drivers restate a single figure rather than connect "
+                            "evidence; read them as context, not as reasons.")
             out: dict = {"grounding": rec, "consistency": warn}
             if retry:
                 out["revisions"] = revisions + 1
@@ -347,7 +398,8 @@ def build_graph(rt: Runtime) -> StateGraph:
                     "benchmark": s.data.benchmark, "benchmark_price": state.get("benchmark_price"),
                     "data_source": state.get("data_source"), "warnings": state.get("warnings", []),
                     "disclaimer": DISCLAIMER, "generated_at": date.today().isoformat(),
-                    "model": {r: s.model_for(r).name for r in ("analyst", "debate", "pm")},
+                    "model": {**{r: s.model_for(r).name for r in ("analyst", "debate", "pm")},
+                              "earnings": s.model_for("analyst", "earnings").name},
                     "language": state.get("language", "English"), "facts": state.get("facts", [])}
             if base["status"] != "ok":
                 base["markdown"] = render_markdown(base)
@@ -386,7 +438,8 @@ def build_graph(rt: Runtime) -> StateGraph:
                             ["recall_memory", "finalize"])
     for name in PARALLEL:
         g.add_edge("recall_memory", name)
-    g.add_edge("web_research", "street")
+    for name in AFTER_RESEARCH:
+        g.add_edge("web_research", name)
     g.add_edge(list(ANALYSTS), "bull")
     g.add_edge("bull", "bear")
     g.add_conditional_edges("bear", after_bear, ["bull", "pm"])

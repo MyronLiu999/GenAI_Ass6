@@ -22,12 +22,13 @@ STANCE_COLOR = {"bullish": "green", "neutral": "gray", "bearish": "red"}
 NODE_LABEL = {"collect_data": "Market data & evidence pack", "recall_memory": "Memory: past calls & notes",
               "fundamental": "Fundamental analyst", "technical": "Technical analyst",
               "sentiment": "Sentiment & news analyst", "risk": "Risk manager",
-              "web_research": "Web research: searching and verifying sources", "street": "Street research analyst",
+              "web_research": "Web research: street notes + industry drivers, sources verified",
+              "street": "Street research analyst", "earnings": "Earnings & demand analyst",
               "bull": "Bull researcher",
               "bear": "Bear researcher", "pm": "Portfolio manager", "grounding": "Grounding check",
               "finalize": "Report & memory write"}
 ANALYST_TITLE = {"fundamental": "Fundamental", "technical": "Technical", "sentiment": "Sentiment & News", "risk": "Risk",
-                 "street": "Street research"}
+                 "street": "Street research", "earnings": "Earnings & demand"}
 CITE = re.compile(r"\[\s*([A-Z]\.[A-Za-z0-9_]+(?:\s*[,;]\s*[A-Z]\.[A-Za-z0-9_]+)*)\s*\]")
 
 
@@ -60,7 +61,10 @@ def model_status(d: Desk) -> tuple[bool, str]:
         return True, "scripted (offline)"
     env = cfg.api_key_env or ("ANTHROPIC_API_KEY" if cfg.provider == "anthropic" else "OPENAI_API_KEY")
     ok = plausible_key(os.environ.get(env))
-    return ok, f"{cfg.provider} · {cfg.name}" + ("" if ok else f" · {env} missing or invalid")
+    names = {"PM": cfg.name, "earnings": d.s.model_for("analyst", "earnings").name,
+             "analysts": d.s.model_for("analyst").name}
+    label = cfg.name if len(set(names.values())) == 1 else " · ".join(f"{k} {v}" for k, v in names.items())
+    return ok, f"{cfg.provider} · {label}" + ("" if ok else f" · {env} missing or invalid")
 
 
 def md(text: str) -> str:

@@ -124,8 +124,12 @@ class LangChainBackend:
         self._key = key
         common: dict[str, Any] = {"model": cfg.name, "max_tokens": cfg.max_tokens, "timeout": cfg.timeout_s,
                                   "max_retries": 0, "api_key": key}
-        if cfg.temperature is not None:
+        if cfg.temperature is not None and not cfg.reasoning_effort:   # reasoning models reject temperature
             common["temperature"] = cfg.temperature
+        if cfg.reasoning_effort and cfg.provider == "openai":
+            # reasoning models take function tools only through the Responses API
+            common["use_responses_api"] = True
+            common["reasoning"] = {"effort": cfg.reasoning_effort}
         if cfg.provider == "anthropic":
             from langchain_anthropic import ChatAnthropic
             self.model = ChatAnthropic(**common)
@@ -165,9 +169,10 @@ class LangChainBackend:
 
         from equitydesk.policy.provenance import mark_citations
         client = openai.OpenAI(api_key=self._key, max_retries=0, timeout=self.cfg.timeout_s * 2)
+        extra = {"reasoning": {"effort": self.cfg.reasoning_effort}} if self.cfg.reasoning_effort else {}
         r = client.responses.create(model=self.cfg.name, instructions=system, input=prompt,
                                     tools=[{"type": "web_search", "search_context_size": context_size}],
-                                    max_output_tokens=max(self.cfg.max_tokens, 2500))
+                                    max_output_tokens=max(self.cfg.max_tokens, 2500), **extra)
         text, annotations = "", []
         for item in r.output:
             if item.type != "message":
@@ -204,8 +209,9 @@ class ScriptedBackend:
     name = "scripted"
 
     def __init__(self, fail_schema_once: bool = False, bad_citation_once: bool = False, transient_errors: int = 0,
-                 rating: str = "HOLD"):
+                 rating: str = "HOLD", shallow_once: bool = False):
         self.fail_schema_once, self.bad_citation_once = fail_schema_once, bad_citation_once
+        self.shallow_once = shallow_once      # first Decision restates single figures (fails the depth check)
         self.transient_errors, self.rating = transient_errors, rating
         self._lock = threading.Lock()
 
@@ -220,7 +226,7 @@ class ScriptedBackend:
     @staticmethod
     def _facts(messages: list[BaseMessage]) -> list[tuple[str, str, str]]:
         text = "\n".join(m.content for m in messages if isinstance(m.content, str))
-        return [(i, l, v) for i, l, v in FACT_LINE.findall(text) if i[0] not in ("N", "W")]
+        return [(i, l, v) for i, l, v in FACT_LINE.findall(text) if i[0] not in ("N", "W", "D")]
 
     @staticmethod
     def _usage(messages, out: str) -> Usage:
@@ -231,9 +237,26 @@ class ScriptedBackend:
         chosen = facts[offset:offset + k] or facts[:k]
         return [{"claim": f"{label} is {value} [{fid}].", "evidence": [fid]} for fid, label, value in chosen]
 
+    @staticmethod
+    def _linked(facts, k: int) -> list[dict]:
+        """Points that connect two facts from different categories (what the depth check asks of the PM)."""
+        out, used = [], set()
+        for i, (a, la, va) in enumerate(facts):
+            if a in used:
+                continue
+            b = next(((fb, lb, vb) for fb, lb, vb in facts[i + 1:] if fb[0] != a[0] and fb not in used), None)
+            if b is None:
+                continue
+            used |= {a, b[0]}
+            out.append({"claim": f"{la} is {va} [{a}] while {b[1]} is {b[2]} [{b[0]}].", "evidence": [a, b[0]]})
+            if len(out) == k:
+                break
+        return out
+
     def structured(self, schema, messages):
-        from equitydesk.schemas import (AnalystReport, DebateTurn, Decision, HeadlineView, QAAnswer, ResearchNote,
-                                        ResearchNotes, SentimentReport, StreetReport)
+        from equitydesk.schemas import (AnalystReport, DebateTurn, Decision, DriverItem, DriverNotes,
+                                        EarningsReport, HeadlineView, QAAnswer, ResearchNote, ResearchNotes,
+                                        SentimentReport, StreetReport)
         self._maybe_transient()
         with self._lock:
             if self.fail_schema_once:
@@ -259,6 +282,11 @@ class ScriptedBackend:
                 base.update(consensus_view="Offline demo: the street view is summarised from the A.* evidence.",
                             street_bull=self._points(facts, 1), street_bear=self._points(facts, 1, 1),
                             recent_changes=self._points(facts, 1, 2), key_debates=["Offline demo debate."])
+            elif schema is EarningsReport:
+                bar = next((v for f, _, v in facts if f == "E.q_bar"), None)
+                base.update(setup_call="in line" if bar else "no data",
+                            setup_view=(f"Offline demo: {bar} [E.q_bar]." if bar else "Offline demo: no estimates."),
+                            demand_drivers=self._points(facts, 1, 1), quality_flags=[])
             obj = schema(**base)
         elif schema.__name__ == "NewsTriage":
             ids = list(dict.fromkeys(re.findall(r"\[(H\d+)\]", text)))
@@ -270,24 +298,36 @@ class ScriptedBackend:
                                                     kind="sell-side note", stance="neutral", rating="Hold",
                                                     thesis="Offline demo note.", key_points=["Demo point."])
                                        for i in ids], debates=["Offline demo debate."])
+        elif schema is DriverNotes:
+            ids = list(dict.fromkeys(re.findall(r"\[(S\d+)\]", text)))
+            obj = DriverNotes(items=[DriverItem(source_ids=[i], source=f"Demo Industry {i}", date="2026-11-01",
+                                                kind="customer spending", metric="Demo customer capex guidance",
+                                                figure="$100 billion", period="2026",
+                                                context="Offline demo driver.") for i in ids])
         elif schema is DebateTurn:
             bull = "bull" in system.split("\n", 1)[0]
             pts = self._points(facts, 2, offset=0 if bull else 2)
             obj = DebateTurn(argument=("The bull case: " if bull else "The bear case: ") + " ".join(p["claim"] for p in pts),
                              points=pts, rebuttal="The other side overstates its evidence.")
         elif schema is Decision:
-            drivers, risks = self._points(facts, 2, 0), self._points(facts, 2, 2)
+            drivers, risks = (self._linked(facts, 2) or self._points(facts, 2, 0)), self._points(facts, 2, 2)
             with self._lock:
                 bad, self.bad_citation_once = self.bad_citation_once, False
             if bad:
                 drivers = drivers + [{"claim": "A made-up figure of $999.99 [X.bogus].", "evidence": ["X.bogus"]}]
+            with self._lock:
+                shallow, self.shallow_once = self.shallow_once, False
+            if shallow:
+                drivers = self._points(facts, 2, 0)
             obj = Decision(rating=self.rating, conviction=55, horizon_months=6,
                            thesis=(drivers[0]["claim"] if drivers else "Insufficient evidence."),
                            drivers=drivers, risks=risks, catalysts=["Next earnings report"],
                            invalidation=["A close below the protective stop", "A close above 60-day resistance"],
                            memory_note="No previous calls on this ticker and no user notes.",
                            key_debates=["Offline demo: does growth justify the multiple?"],
-                           variant_view="Offline demo: in line with the street consensus.")
+                           variant_view="Offline demo: in line with the street consensus.",
+                           expectations_gap=("Offline demo: " + next((f"{v} [E.q_bar]." for f, _, v in facts
+                                                                      if f == "E.q_bar"), "no consensus estimates.")))
         elif schema is QAAnswer:
             pts = self._points(facts, 1)
             obj = QAAnswer(answer=pts[0]["claim"] if pts else "The evidence does not cover that.",
@@ -363,8 +403,8 @@ class LLM:
         self._lock = threading.Lock()
         self._sleep = sleep
 
-    def backend(self, role: str) -> tuple[Backend, ModelCfg]:
-        cfg = self.s.model_for(role)
+    def backend(self, role: str, node: str | None = None) -> tuple[Backend, ModelCfg]:
+        cfg = self.s.model_for(role, node)
         key = cfg.model_dump_json()
         with self._lock:
             if key not in self._backends:
@@ -381,7 +421,7 @@ class LLM:
 
     def _call(self, node: str, role: str, fn: Callable[[Backend, list[BaseMessage]], Any],
               messages: list[BaseMessage], repair: bool = False) -> Any:
-        backend, cfg = self.backend(role)
+        backend, cfg = self.backend(role, node)
         attempt = 0
         while True:
             self._check_budget(node)
@@ -442,7 +482,7 @@ class LLM:
 
     def web_search(self, node: str, role: str, system: str, prompt: str, context_size: str = "medium") -> dict:
         """Hosted web search, metered like any call. Raises Unsupported when the provider cannot search."""
-        backend, _ = self.backend(role)
+        backend, _ = self.backend(role, node)
         if not hasattr(backend, "web_search"):
             raise Unsupported(f"backend {backend.name} has no web search")
         messages = [SystemMessage(system), HumanMessage(prompt)]

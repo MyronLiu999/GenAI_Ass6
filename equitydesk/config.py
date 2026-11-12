@@ -23,6 +23,7 @@ class ModelCfg(BaseModel):
     max_retries: int = Field(3, ge=0, le=8)
     api_key_env: str | None = None
     base_url: str | None = None
+    reasoning_effort: Literal["minimal", "low", "medium", "high"] | None = None   # reasoning models (gpt-5.x, o3)
 
 
 class BudgetCfg(BaseModel):
@@ -62,6 +63,8 @@ class ResearchCfg(BaseModel):
     context_size: Literal["low", "medium", "high"] = "medium"   # more context = deeper, more tokens
     max_notes: int = Field(8, ge=1, le=20)
     lookback_days: int = Field(60, ge=7, le=365)
+    drivers: bool = True                     # a second search for quantified industry and demand drivers
+    max_drivers: int = Field(10, ge=1, le=20)
 
 
 class PathsCfg(BaseModel):
@@ -79,11 +82,14 @@ class Settings(BaseModel):
     paths: PathsCfg = PathsCfg()
 
     # -- derived ---------------------------------------------------------------------------------
-    def model_for(self, role: str) -> ModelCfg:
-        """The model for a role: `model`, with that role's overrides from `roles` merged on top."""
+    def model_for(self, role: str, node: str | None = None) -> ModelCfg:
+        """The model for a role: `model`, with that role's overrides from `roles` merged on top, and then a
+        node's own overrides (e.g. `roles: {earnings: {...}}` for just the earnings analyst)."""
         if role not in ROLES:
             raise ValueError(f"unknown role {role!r}; expected one of {ROLES}")
         merged = self.model.model_dump() | dict(self.roles.get(role) or {})
+        if node and node not in ROLES and node in self.roles:
+            merged |= dict(self.roles[node])
         return ModelCfg(**merged)
 
     def _abs(self, p: str) -> Path:

@@ -97,7 +97,8 @@ def test_news_normaliser_accepts_both_shapes():
     flat = [{"title": "B", "publisher": "WSJ", "providerPublishTime": 1762000000, "link": "v"}]
     out = normalize_news(nested + flat + [{"content": {"title": ""}}], limit=10)
     assert [(n["title"], n["publisher"], n["url"]) for n in out] == [("A", "Reuters", "u"), ("B", "WSJ", "v")]
-    assert out[0]["published"] == "2026-11-01"
+    assert out[0]["published"] == "2026-11-01T10:00:00Z"
+    assert out[1]["published"].startswith("2025-11-01T")
 
 
 def test_evidence_pack(settings):
@@ -160,3 +161,14 @@ def test_thin_history_degrades(settings):
     b = FixtureProvider(settings).fetch("FLAT")
     idx = index(build_facts(b, {}, settings))
     assert "T.price" in idx and "T.sma200" not in idx and "T.ret_1y" not in idx
+
+
+def test_action_text_survives_pandas_nan():
+    """The News page passes actions through a DataFrame, which turns a missing prior target into NaN."""
+    import pandas as pd
+    from equitydesk.tools.evidence import _action_text
+    rec = pd.DataFrame([{"firm": "X", "action": "up", "from": "Hold", "to": "Buy", "pt": 425.0, "prior_pt": None},
+                        {"firm": "Y", "action": "main", "from": None, "to": "Buy", "pt": None, "prior_pt": None}]
+                       ).to_dict("records")
+    assert _action_text(rec[0]) == "X: upgrade Hold → Buy; target $425"
+    assert "nan" not in _action_text(rec[1]).lower()

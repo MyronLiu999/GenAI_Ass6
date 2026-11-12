@@ -1,0 +1,273 @@
+{
+ "beats": [
+  {
+   "date": "2026-11-02",
+   "eps_est": 1.98,
+   "eps_actual": 2.1,
+   "surprise_pct": 5.8
+  },
+  {
+   "date": "2026-07-30",
+   "eps_est": 1.89,
+   "eps_actual": 2.02,
+   "surprise_pct": 6.74
+  },
+  {
+   "date": "2026-04-30",
+   "eps_est": 1.94,
+   "eps_actual": 2.01,
+   "surprise_pct": 3.46
+  },
+  {
+   "date": "2026-01-29",
+   "eps_est": 2.67,
+   "eps_actual": 2.84,
+   "surprise_pct": 6.25
+  },
+  {
+   "date": "2025-10-30",
+   "eps_est": 1.77,
+   "eps_actual": 1.85,
+   "surprise_pct": 4.52
+  },
+  {
+   "date": "2025-07-31",
+   "eps_est": 1.43,
+   "eps_actual": 1.57,
+   "surprise_pct": 9.48
+  },
+  {
+   "date": "2025-05-01",
+   "eps_est": 1.62,
+   "eps_actual": 1.65,
+   "surprise_pct": 1.69
+  },
+  {
+   "date": "2025-01-30",
+   "eps_est": 2.35,
+   "eps_actual": 2.4,
+   "surprise_pct": 2.26
+  },
+  {
+   "date": "2024-10-31",
+   "eps_est": 0.95,
+   "eps_actual": 0.97,
+   "surprise_pct": 2.48
+  },
+  {
+   "date": "2024-08-01",
+   "eps_est": 1.34,
+   "eps_actual": 1.4,
+   "surprise_pct": 4.36
+  },
+  {
+   "date": "2024-05-02",
+   "eps_est": 1.51,
+   "eps_actual": 1.53,
+   "surprise_pct": 1.46
+  },
+  {
+   "date": "2024-02-01",
+   "eps_est": 2.1,
+   "eps_actual": 2.18,
+   "surprise_pct": 3.66
+  },
+  {
+   "date": "2023-11-02",
+   "eps_est": 1.39,
+   "eps_actual": 1.46,
+   "surprise_pct": 4.82
+  },
+  {
+   "date": "2023-08-03",
+   "eps_est": 1.19,
+   "eps_actual": 1.26,
+   "surprise_pct": 5.66
+  },
+  {
+   "date": "2023-05-04",
+   "eps_est": 1.43,
+   "eps_actual": 1.52,
+   "surprise_pct": 6.28
+  },
+  {
+   "date": "2023-02-02",
+   "eps_est": 1.95,
+   "eps_actual": 1.88,
+   "surprise_pct": -3.78
+  },
+  {
+   "date": "2022-10-27",
+   "eps_est": 1.27,
+   "eps_actual": 1.29,
+   "surprise_pct": 1.44
+  },
+  {
+   "date": "2022-07-28",
+   "eps_est": 1.15,
+   "eps_actual": 1.2,
+   "surprise_pct": 3.93
+  },
+  {
+   "date": "2022-04-28",
+   "eps_est": 1.43,
+   "eps_actual": 1.52,
+   "surprise_pct": 6.48
+  },
+  {
+   "date": "2022-01-27",
+   "eps_est": 1.89,
+   "eps_actual": 2.1,
+   "surprise_pct": 11.2
+  },
+  {
+   "date": "2021-10-28",
+   "eps_est": 1.24,
+   "eps_actual": 1.24,
+   "surprise_pct": 0.17
+  },
+  {
+   "date": "2021-07-27",
+   "eps_est": 1.01,
+   "eps_actual": 1.3,
+   "surprise_pct": 28.18
+  },
+  {
+   "date": "2021-04-28",
+   "eps_est": 0.98,
+   "eps_actual": 1.4,
+   "surprise_pct": 42.16
+  },
+  {
+   "date": "2021-01-27",
+   "eps_est": 1.42,
+   "eps_actual": 1.68,
+   "surprise_pct": 18.67
+  }
+ ],
+ "eps_est": {
+  "0q": {
+   "avg": 2.91493,
+   "low": 2.83,
+   "high": 3.18,
+   "yearAgoEps": 1.85,
+   "numberOfAnalysts": 27.0,
+   "growth": 0.5756
+  },
+  "+1q": {
+   "avg": 2.15211,
+   "low": 1.87,
+   "high": 2.48998,
+   "yearAgoEps": 2.01,
+   "numberOfAnalysts": 23.0,
+   "growth": 0.070700005
+  },
+  "0y": {
+   "avg": 9.39913,
+   "low": 8.34,
+   "high": 10.05989,
+   "yearAgoEps": 7.46,
+   "numberOfAnalysts": 38.0,
+   "growth": 0.2599
+  },
+  "+1y": {
+   "avg": 10.57942,
+   "low": 8.57,
+   "high": 12.2,
+   "yearAgoEps": 8.83793,
+   "numberOfAnalysts": 35.0,
+   "growth": 0.19700001
+  }
+ },
+ "rev_est": {
+  "0q": {
+   "avg": 156430011230.0,
+   "low": 154257600000.0,
+   "high": 158132000000.0,
+   "numberOfAnalysts": 23.0,
+   "yearAgoRevenue": 143756000000.0,
+   "growth": 0.088199995
+  },
+  "+1q": {
+   "avg": 124000404410.0,
+   "low": 110769700000.0,
+   "high": 142811158840.0,
+   "numberOfAnalysts": 21.0,
+   "yearAgoRevenue": 111184000000.0,
+   "growth": 0.1153
+  },
+  "0y": {
+   "avg": 477695769830.0,
+   "low": 476002000000.0,
+   "high": 484000000000.0,
+   "numberOfAnalysts": 37.0,
+   "yearAgoRevenue": 416161000000.0,
+   "growth": 0.1479
+  },
+  "+1y": {
+   "avg": 571462772030.0,
+   "low": 492192400000.0,
+   "high": 637905000000.0,
+   "numberOfAnalysts": 35.0,
+   "yearAgoRevenue": 528089931800.0,
+   "growth": 0.082100004
+  }
+ },
+ "quarters": [
+  {
+   "period": "2026-09-30",
+   "revenue": 114477000000.0,
+   "gross_profit": 54820000000.0,
+   "operating_income": 35631000000.0,
+   "net_income": 30711000000.0,
+   "receivables": 43817000000.0,
+   "inventory": 14541000000.0,
+   "fcf": 25859000000.0,
+   "capex": -2242000000.0
+  },
+  {
+   "period": "2026-06-30",
+   "revenue": 109417000000.0,
+   "gross_profit": 54770000000.0,
+   "operating_income": 35695000000.0,
+   "net_income": 29789000000.0,
+   "receivables": 31398000000.0,
+   "inventory": 11092000000.0,
+   "fcf": 31914000000.0,
+   "capex": -2455000000.0
+  },
+  {
+   "period": "2026-03-31",
+   "revenue": 111184000000.0,
+   "gross_profit": 54781000000.0,
+   "operating_income": 35885000000.0,
+   "net_income": 29578000000.0,
+   "receivables": 30339000000.0,
+   "inventory": 6747000000.0,
+   "fcf": 26731000000.0,
+   "capex": -1971000000.0
+  },
+  {
+   "period": "2025-12-31",
+   "revenue": 143756000000.0,
+   "gross_profit": 69231000000.0,
+   "operating_income": 50852000000.0,
+   "net_income": 42097000000.0,
+   "receivables": 39921000000.0,
+   "inventory": 5875000000.0,
+   "fcf": 51552000000.0,
+   "capex": -2373000000.0
+  },
+  {
+   "period": "2025-09-30",
+   "revenue": 102466000000.0,
+   "gross_profit": 48341000000.0,
+   "operating_income": 32427000000.0,
+   "net_income": 27466000000.0,
+   "receivables": 39777000000.0,
+   "inventory": 5718000000.0,
+   "fcf": 26486000000.0,
+   "capex": -3242000000.0
+  }
+ ]
+}

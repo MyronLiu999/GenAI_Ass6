@@ -7,6 +7,8 @@
 
 models:
   gpt-4o:            {input: 2.50, output: 10.00, cache_read: 1.25, source: "https://developers.openai.com/api/docs/pricing", read: 2026-11-05}
+  gpt-5.5:           {input: 5.00, output: 30.00, cache_read: 0.50, source: "https://developers.openai.com/api/docs/pricing (reported; re-verify)", read: 2026-11-11}
+  gpt-5.4:           {input: 2.50, output: 15.00, cache_read: 0.25, source: "https://developers.openai.com/api/docs/pricing (reported; re-verify)", read: 2026-11-11}
   gpt-4o-mini:       {input: 0.15, output: 0.60,  cache_read: 0.075, source: "https://developers.openai.com/api/docs/pricing", read: 2026-11-05}
   claude-opus-5:     {input: 5.00, output: 25.00, cache_read: 0.50, source: "https://platform.claude.com/docs/en/about-claude/pricing", read: 2026-06-24}
   claude-sonnet-5:   {input: 2.00, output: 10.00, cache_read: 0.20, source: "https://platform.claude.com/docs/en/about-claude/pricing", read: 2026-06-24}

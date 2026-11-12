@@ -51,12 +51,14 @@ h1, h2, h3, h4 {letter-spacing: -0.01em;}
 .ed-cite {font-family: ui-monospace, Menlo, monospace; font-size: .72rem; background: #eef2ff; color: #3730a3;
   padding: 0 5px; border-radius: 5px; margin-left: 2px; white-space: nowrap;}
 .ed-news {display: flex; gap: 12px; align-items: flex-start; padding: 11px 4px; border-bottom: 1px solid #edf1f7;}
-.ed-news .when {min-width: 86px; color: #64748b; font-size: .78rem; padding-top: 2px;}
+.ed-news .when {min-width: 118px; color: #64748b; font-size: .78rem; padding-top: 2px;}
 .ed-news .body {flex: 1;}
 .ed-news .title {font-weight: 650; font-size: .95rem; color: #0f172a;}
 .ed-news .title a {color: #0f172a; text-decoration: none;} .ed-news .title a:hover {color: #1d4ed8;}
 .ed-news .sub {color: #64748b; font-size: .8rem; margin-top: 3px;}
 .ed-muted {color: #94a3b8;}
+.ed-figure {font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-top: 8px; letter-spacing: -.01em;}
+.ed-metric {font-size: .86rem; color: #334155; margin-bottom: 4px;}
 .ed-section {font-size: .74rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #64748b;
   margin: 14px 0 6px;}
 .ed-feature {background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 18px; height: 100%;}
@@ -182,10 +184,44 @@ def note_card(n: dict) -> None:
          meta=f"{esc(n.get('date', ''))} · {esc(n.get('domain', ''))} · {link(n.get('url', ''), n.get('title') or 'read')}")
 
 
+DRIVER_TONE = {"company guidance": "blue", "customer spending": "green", "market size": "violet",
+               "supply and capacity": "amber", "pricing": "amber", "competition": "red", "expectations": "blue",
+               "regulation": "red", "other": "slate"}
+
+
+def driver_card(d: dict) -> None:
+    """One quantified industry or demand driver found on the web, with its verified source."""
+    kind = d.get("kind", "other")
+    head = (f'<div class="ed-figure">{esc(d.get("figure", ""))}</div>'
+            f'<div class="ed-metric">{esc(d.get("metric", ""))}'
+            + (f' <span class="ed-muted">· {esc(d["period"])}</span>' if d.get("period") else "") + "</div>")
+    body = f"<div>{chip(kind, DRIVER_TONE.get(kind, 'slate'))}</div>{head}" + \
+        (f"<p>{esc(d['context'])}</p>" if d.get("context") else "")
+    card(esc(d.get("source", "Source")) + (f' <span class="ed-cite">{esc(d["fact_id"])}</span>' if d.get("fact_id") else ""),
+         body, accent="slate",
+         meta=f"{esc(d.get('date', ''))} · {esc(d.get('domain', ''))} · {link(d.get('url', ''), d.get('title') or 'read')}")
+
+
+def when_text(value: str) -> str:
+    """A publish time for display: 'YYYY-MM-DD HH:MM' in this machine's local time zone, or the date alone
+    when the source gave no time."""
+    from datetime import datetime, timezone
+    v = (value or "").strip()
+    if len(v) <= 10:
+        return v
+    try:
+        dt = datetime.fromisoformat(v.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone().strftime("%Y-%m-%d %H:%M")
+    except ValueError:
+        return v[:16]
+
+
 def news_row(when: str, title: str, url: str, sub: str, chips_html: str = "") -> str:
     t = f'<a href="{esc(normalize_url(url))}" target="_blank" rel="noopener noreferrer">{esc(title)}</a>' \
         if normalize_url(url or "") else esc(title)
-    return (f'<div class="ed-news"><div class="when">{esc(when)}</div><div class="body">'
+    return (f'<div class="ed-news"><div class="when">{esc(when_text(when))}</div><div class="body">'
             f'<div class="title">{t}</div><div class="sub">{chips_html}{sub}</div></div></div>')
 
 

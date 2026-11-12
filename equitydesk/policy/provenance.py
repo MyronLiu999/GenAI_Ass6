@@ -75,7 +75,8 @@ def verify_notes(notes: list[dict], sources: list[dict], max_notes: int) -> tupl
         if not valid:
             dropped.append({**n, "reason": "no cited source"})
             continue
-        key = ((n.get("source") or "").strip().lower(), n.get("date", ""), n.get("price_target"))
+        key = ((n.get("source") or "").strip().lower(), n.get("date", ""), n.get("price_target"),
+               (n.get("metric") or "").strip().lower(), n.get("figure"))
         if key in seen:
             dropped.append({**n, "reason": "duplicate"})
             continue

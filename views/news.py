@@ -19,10 +19,13 @@ ui.page_header("News tracker", "Headlines and analyst actions across your watchl
 
 profile = d.store.get_profile()
 tickers = profile["watchlist"]
-c1, c2, c3 = st.columns([3, 1.2, 1.2])
+c1, c2, c3, c4 = st.columns([3, 1.2, 1.2, 1.2])
 chosen = c1.multiselect("Tickers", tickers, default=tickers, help="Edit the list on the Watchlist page.")
 only_about = c2.toggle("Only about the company", value=True)
-fresh_hours = c3.selectbox("Mark as NEW if first seen within", [6, 24, 72], index=1, format_func=lambda h: f"{h} hours")
+auto = c3.toggle("Auto-triage new headlines", value=True,
+                 help="Classify tone and materiality of untriaged headlines when the page loads, in batches of 20 "
+                      "(about $0.005 per batch with gpt-4o). Off: use the button below.")
+fresh_hours = c4.selectbox("Mark as NEW if first seen within", [6, 24, 72], index=1, format_func=lambda h: f"{h} hours")
 
 with st.spinner("Collecting headlines…"):
     rows, errors = newslib.collect(d.provider, d.store, chosen or [])
@@ -61,18 +64,38 @@ k[3].metric("Analyst actions (7d)", len(recent),
             delta_color="inverse")
 
 tab_h, tab_a = st.tabs(["Headlines", "Analyst actions"])
+
+
+def run_triage(rows_todo: list[dict]) -> None:
+    with st.spinner(f"Triaging {len(rows_todo)} headline(s)…"):
+        try:
+            out = newslib.triage(s, d.store, rows_todo, backend_factory=d.factory)
+        except Exception as e:
+            st.session_state["triage_error"] = f"{type(e).__name__}: {e}"
+            return
+    st.session_state["triage_result"] = out
+    st.rerun()
+
+
 with tab_h:
     untriaged = [r for r in shown if not r.get("triaged_at")]
+    tried = st.session_state.setdefault("auto_triaged", set())
+    pending = [r for r in untriaged if r["key"] not in tried]
+    if auto and pending and not st.session_state.get("triage_error"):
+        tried.update(r["key"] for r in pending)        # at most one automatic attempt per headline per session
+        run_triage(pending)
+    res = st.session_state.pop("triage_result", None)
+    if res:
+        st.toast(f"Triaged {res['triaged']} headline(s) for ${res['cost_usd']:.4f}")
+        if res.get("missing"):
+            st.warning(f"The model skipped {res['missing']} headline(s) twice; they stay marked 'untriaged'. "
+                       "Press AI triage to try again.")
+    if st.session_state.get("triage_error"):
+        st.error("AI triage failed: " + st.session_state.pop("triage_error"))
     b1, b2 = st.columns([1, 3])
     if b1.button(f"AI triage ({len(untriaged)})", icon=":material/auto_awesome:", disabled=not untriaged,
-                 help="One model call classifies tone and materiality for the untriaged headlines (about $0.01)."):
-        with st.spinner("Triaging…"):
-            try:
-                out = newslib.triage(s, d.store, untriaged, backend_factory=d.factory)
-                st.toast(f"Triaged {out['triaged']} headlines for ${out['cost_usd']:.4f}")
-                st.rerun()
-            except Exception as e:
-                st.error(f"{type(e).__name__}: {e}")
+                 help="Classify tone and materiality for every untriaged headline, in batches of 20."):
+        run_triage(untriaged)
     b2.caption("Tone and materiality come from the AI triage; whether a headline is about the company is decided "
                "in code from the ticker and company name.")
     out = []
@@ -84,6 +107,8 @@ with tab_h:
             chips += ui.chip(r["tone"], ui.TONE.get(r["tone"], "slate"))
         if r.get("materiality"):
             chips += ui.chip(f"{r['materiality']} materiality", ui.MATERIALITY.get(r["materiality"], "slate"))
+        if not r.get("triaged_at"):
+            chips += ui.chip("untriaged", "slate")
         if not r.get("about"):
             chips += ui.chip("not about the company", "slate")
         if r.get("flagged"):

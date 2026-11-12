@@ -108,13 +108,16 @@ if not rep:
     ui.html_block("""
 <div class="ed-hero">
   <div class="t">Equity Research Desk</div>
-  <div class="s">Five analysts in parallel, web research with verified sources, a bull/bear debate and a portfolio
-  manager, with every number computed in code and every claim fact-checked before you see it.</div>
+  <div class="s">Six analysts, web research with verified sources (street notes and industry demand data), a
+  bull/bear debate and a portfolio manager that must argue from expectations: the bar for the next report, the
+  demand behind next year's numbers, and what the headline figures hide. Every number is computed in code and
+  every claim fact-checked before you see it.</div>
 </div>""")
     cols = st.columns(4)
     for c, (n, h, t) in zip(cols, [
-        ("01", "Evidence pack", "80+ figures computed in code: technicals, risk, fundamentals, sell-side actions and "
-                                "estimate revisions. Every one has an id agents must cite."),
+        ("01", "Evidence pack", "120+ figures computed in code: technicals, risk, fundamentals, the earnings set-up "
+                                "(consensus bar vs run-rate, beat record), earnings-quality checks and sell-side "
+                                "revisions. Every one has an id agents must cite."),
         ("02", "Street research", "Recent analyst notes and independent research found on the web. Only sources the "
                                   "search tool actually cited survive."),
         ("03", "Debate and decision", "Bull and bear argue; the PM states the key debates and its variant view "
@@ -143,6 +146,9 @@ ui.hero(rep, facts)
 left, right = st.columns([1.35, 1])
 with left:
     ui.card("Thesis", f"<p>{ui.rich(dec['thesis'])}</p>", accent="")
+    if dec.get("expectations_gap"):
+        ui.card("Expectations gap · the next report and next year", f"<p>{ui.rich(dec['expectations_gap'])}</p>",
+                accent="blue")
     if dec.get("variant_view"):
         ui.card("Variant view · where we differ from the street", f"<p>{ui.rich(dec['variant_view'])}</p>",
                 accent="amber")
@@ -156,7 +162,7 @@ if notes:
         for w in notes:
             st.markdown(f"- {md(w)}")
 
-tabs = st.tabs(["Summary", "Street research", f"News ({len((analysts.get('sentiment') or {}).get('headlines') or [])})",
+tabs = st.tabs(["Summary", "Earnings & demand", "Street research", f"News ({len((analysts.get('sentiment') or {}).get('headlines') or [])})",
                 "Chart", "Analysts", "Debate", "Evidence", "Ask the desk", "Report"])
 
 with tabs[0]:
@@ -186,6 +192,69 @@ with tabs[0]:
         ui.card("Override rationale", f"<p>{ui.rich(dec['override_rationale'])}</p>", accent="amber")
 
 with tabs[1]:
+    earn = analysts.get("earnings") or {}
+    num = lambda k: facts[k].numeric if k in facts else None  # noqa: E731
+    k = st.columns(5)
+    k[0].metric("Consensus revenue, next quarter", f"${num('E.q_rev_cons'):,.1f}B" if num("E.q_rev_cons") else "—",
+                delta=f"{ui.signed(num('E.q_rev_implied_yoy'))} YoY implied" if num("E.q_rev_implied_yoy") is not None
+                else None, delta_color="off")
+    k[1].metric("Revenue growth last quarter (YoY)", ui.signed(num("Q.rev_yoy_last")),
+                delta=f"QoQ {ui.signed(num('Q.rev_qoq_last'))}" if num("Q.rev_qoq_last") is not None else None,
+                delta_color="off")
+    if num("E.q_rev_run_rate_vs_cons") is not None:
+        k[2].metric("Run-rate vs consensus", ui.signed(num("E.q_rev_run_rate_vs_cons")),
+                    help="Next-quarter revenue if sequential growth matched its recent average, against the "
+                         "consensus. Arithmetic, not a forecast.")
+    else:
+        k[2].metric("YoY-held vs consensus", ui.signed(num("E.q_rev_yoy_held_vs_cons")),
+                    help="Next-quarter revenue if year-over-year growth held at last quarter's pace, against the "
+                         "consensus. Used when sequential growth is seasonal or uneven. Arithmetic, not a forecast.")
+    k[3].metric("EPS beat record", (facts["E.beat_record"].value.replace("beat in ", "").replace(" the last", "")
+                                    if "E.beat_record" in facts else "—"),
+                delta=f"avg surprise {ui.signed(num('E.surprise_avg_4q'))}" if num("E.surprise_avg_4q") is not None
+                else None, delta_color="off")
+    k[4].metric("P/E on next-year EPS", f"{num('E.pe_ny'):.1f}x" if num("E.pe_ny") else "—",
+                delta=f"next-year revenue {ui.signed(num('E.ny_rev_growth'))}" if num("E.ny_rev_growth") is not None
+                else None, delta_color="off")
+    if "E.q_bar" in facts or "Q.quality_flags" in facts:
+        c1, c2 = st.columns(2)
+        with c1:
+            if "E.q_bar" in facts:
+                ui.card("The bar for the next report", f"<p>{ui.esc(facts['E.q_bar'].value)}</p>"
+                        + (f"<div class='meta'>{ui.esc(facts['Q.rev_qoq_path'].label)}: "
+                           f"{ui.esc(facts['Q.rev_qoq_path'].value)}</div>" if "Q.rev_qoq_path" in facts else ""),
+                        accent="blue")
+        with c2:
+            if "Q.quality_flags" in facts:
+                ui.card("Earnings-quality flags (computed)", f"<p>{ui.esc(facts['Q.quality_flags'].value)}</p>",
+                        accent="amber")
+    if earn and not earn.get("failed"):
+        call = earn.get("setup_call", "")
+        tone = {"beat likely": "green", "miss risk": "red", "in line": "slate"}.get(call, "slate")
+        ui.card("Earnings & demand analyst", f"<div>{ui.chip(call or 'n/a', tone)}</div>"
+                f"<p>{ui.rich(earn.get('setup_view', ''))}</p><p>{ui.rich(earn.get('summary', ''))}</p>",
+                accent={"green": "green", "red": "red"}.get(tone, ""),
+                meta=f"{ui.esc(earn['stance'])} {earn['score']:+.2f} · confidence {earn['confidence']}")
+        c1, c2 = st.columns(2)
+        with c1:
+            if earn.get("demand_drivers"):
+                ui.card("Demand drivers", ui.point_list(earn["demand_drivers"]), accent="green")
+        with c2:
+            if earn.get("quality_flags"):
+                ui.card("Earnings quality", ui.point_list(earn["quality_flags"]), accent="amber")
+    drivers = research.get("drivers") or []
+    ui.section(f"Industry and demand data found on the web · {len(drivers)} with verified sources")
+    if drivers:
+        cols = st.columns(3)
+        for i, x in enumerate(drivers):
+            with cols[i % 3]:
+                ui.driver_card(x)
+    else:
+        st.info({"off": "Web research was off for this run.",
+                 "unsupported": "Web research needs the OpenAI provider."}
+                .get(research.get("driver_status") or research.get("status"), "No industry data for this run."))
+
+with tabs[2]:
     street = analysts.get("street") or {}
     get = lambda k: facts[k].numeric if k in facts else None  # noqa: E731
     k = st.columns(5)
@@ -232,7 +301,7 @@ with tabs[1]:
                  "unsupported": "Web research needs the OpenAI provider; this run used the structured sell-side data only."}
                 .get(research.get("status"), "No research notes for this run."))
 
-with tabs[2]:
+with tabs[3]:
     sent = analysts.get("sentiment") or {}
     heads = {h["id"]: h for h in sent.get("headlines") or []}
     news = [f for fid, f in facts.items() if fid.startswith("N.")]
@@ -258,7 +327,7 @@ with tabs[2]:
     ui.html_block('<div class="ed-card">' + ("".join(rows) or "<p class='ed-muted'>No headlines.</p>") + "</div>")
     st.caption("Track headlines across your whole watchlist on the News page.")
 
-with tabs[3]:
+with tabs[4]:
     try:
         hist = d.provider.history(rep["ticker"], s.data.history_period)
         if hist.empty:
@@ -268,7 +337,7 @@ with tabs[3]:
     except Exception as e:  # the report stays readable when the network is down
         st.warning(f"Chart unavailable: {e}")
 
-with tabs[4]:
+with tabs[5]:
     cols = st.columns(2)
     for i, (name, a) in enumerate(analysts.items()):
         with cols[i % 2]:
@@ -283,7 +352,7 @@ with tabs[4]:
             ui.card(ANALYST_TITLE.get(name, name), f"<div>{head}</div><p>{ui.rich(a['summary'])}</p>"
                     + ui.point_list(a.get("points")) + gaps, accent={"green": "green", "red": "red"}.get(tone, "slate"))
 
-with tabs[5]:
+with tabs[6]:
     for t in rep.get("debate", []):
         with st.chat_message("user" if t["side"] == "bull" else "assistant",
                              avatar=":material/trending_up:" if t["side"] == "bull" else ":material/trending_down:"):
@@ -292,7 +361,7 @@ with tabs[5]:
             if t.get("rebuttal"):
                 st.caption("Rebuttal: " + md(t["rebuttal"]))
 
-with tabs[6]:
+with tabs[7]:
     df = pd.DataFrame([{"id": f.id, "category": CATEGORIES.get(f.id.split(".")[0], ""), "item": f.label,
                         "value": f.display(), "as of": f.as_of, "source": f.source, "flagged": f.flagged,
                         "url": f.url or None} for f in facts.values()])
@@ -303,7 +372,7 @@ with tabs[6]:
                                 "flagged": st.column_config.CheckboxColumn("injection flag"),
                                 "value": st.column_config.TextColumn(width="large")})
 
-with tabs[7]:
+with tabs[8]:
     qa = ReportQA(d)
     st.caption("Ask follow-up questions. Answers come from this report's evidence only, including the research "
                "notes; the conversation is checkpointed per report and survives a reload.")
@@ -323,7 +392,7 @@ with tabs[7]:
             except Exception as e:
                 st.error(f"{type(e).__name__}: {e}")
 
-with tabs[8]:
+with tabs[9]:
     c1, c2 = st.columns(2)
     c1.download_button("Download Markdown", rep["markdown"], file_name=f"{rep['run_id']}.md", mime="text/markdown",
                        icon=":material/download:", width="stretch")

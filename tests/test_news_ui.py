@@ -63,3 +63,49 @@ def test_third_party_text_is_escaped_in_html():
 def test_action_tone(text, label):
     from equitydesk.ui.components import action_tone
     assert action_tone(text)[0] == label
+
+
+class _SkippingBackend:
+    """Answers every headline except the last one on its first call, like a model that drops items."""
+
+    name = "scripted"
+
+    def __init__(self):
+        from equitydesk.harness.llm import ScriptedBackend
+        self.inner, self.calls = ScriptedBackend(), 0
+
+    def structured(self, schema, messages):
+        obj, err, usage = self.inner.structured(schema, messages)
+        self.calls += 1
+        if self.calls == 1 and obj is not None and len(obj.items) > 1:
+            obj = schema(items=obj.items[:-1])
+        return obj, err, usage
+
+
+def test_triage_asks_again_for_skipped_headlines_and_batches(settings, tmp_path, monkeypatch):
+    from equitydesk.tools import news as newslib
+    from equitydesk.tools.market import FixtureProvider
+    store = Store(tmp_path / "d.db")
+    rows, _ = collect(FixtureProvider(settings), store, ["DEMO"])
+    backend = _SkippingBackend()
+    out = triage(settings, store, rows, backend_factory=lambda cfg: backend)
+    assert out == {"triaged": 4, "missing": 0, "cost_usd": 0.0}
+    assert backend.calls == 2                                          # one retry for the skipped headline
+    assert all(r["triaged_at"] for r in store.list_news(["DEMO"]))
+    monkeypatch.setattr(newslib, "BATCH", 3)                           # 4 headlines -> 2 batches
+    rows2 = [{**r, "triaged_at": None} for r in rows]
+    b2 = _SkippingBackend()
+    assert triage(settings, store, rows2, backend_factory=lambda cfg: b2)["triaged"] == 4
+    assert b2.calls == 3                                               # batch 1, its retry, batch 2
+
+
+def test_publish_time_is_shown_and_date_only_rows_upgrade(tmp_path):
+    from equitydesk.ui.components import when_text
+    assert when_text("2026-11-11") == "2026-11-11"
+    shown = when_text("2026-11-11T14:05:00Z")
+    assert len(shown) == 16 and shown[10] == " " and shown[13] == ":"
+    store = Store(tmp_path / "d.db")
+    item = {"title": "X", "url": "https://a.com/1", "publisher": "P"}
+    store.track_news("DEMO", [{**item, "published": "2026-11-11"}])
+    rows = store.track_news("DEMO", [{**item, "published": "2026-11-11T14:05:00Z"}])
+    assert rows[0]["published"] == "2026-11-11T14:05:00Z"

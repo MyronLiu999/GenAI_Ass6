@@ -171,6 +171,9 @@ class Store:
                            " flagged) VALUES (?,?,?,?,?,?,?,?,?)",
                            (key, ticker, n["title"], n.get("publisher"), n.get("published"), n.get("url"), now(),
                             int(bool(n.get("about"))), int(bool(n.get("flagged")))))
+                # rows recorded before publish times were kept hold only a date: upgrade them
+                db.execute("UPDATE news SET published=? WHERE key=? AND length(coalesce(published, '')) < length(?)",
+                           (n.get("published"), key, n.get("published") or ""))
             rows = [dict(r) for r in db.execute(f"SELECT * FROM news WHERE key IN ({','.join('?' * len(keys))})", keys)] \
                 if keys else []
         return rows

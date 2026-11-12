@@ -39,6 +39,7 @@ class MarketBundle:
     news: list[dict] = field(default_factory=list)  # {title, publisher, published, url, summary}
     calendar: dict = field(default_factory=dict)    # {next_earnings: YYYY-MM-DD}
     street: dict = field(default_factory=dict)      # sell-side research data, see normalize_street
+    earnings: dict = field(default_factory=dict)    # beat history, quarter/year estimates, quarterly results
     errors: dict[str, str] = field(default_factory=dict)
     source: str = "yfinance"
 
@@ -84,6 +85,24 @@ def statement_to_dict(df: pd.DataFrame | None) -> dict:
     return out
 
 
+def iso_utc(value: Any) -> str:
+    """A publish time as 'YYYY-MM-DDTHH:MM:SSZ' (UTC) when the feed gives a time, else the date as given."""
+    if value in (None, ""):
+        return ""
+    try:
+        if isinstance(value, (int, float)):
+            dt = datetime.fromtimestamp(int(value), tz=timezone.utc)
+        else:
+            text = str(value).strip()
+            if len(text) <= 10:
+                return text
+            dt = datetime.fromisoformat(text.replace("Z", "+00:00"))
+            dt = dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt.astimezone(timezone.utc)
+        return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    except (ValueError, OSError, OverflowError):
+        return str(value)[:10]
+
+
 def normalize_news(items: list[dict] | None, limit: int) -> list[dict]:
     """Yahoo's news payload has changed shape over time; accept both the nested and the flat form."""
     out = []
@@ -97,10 +116,8 @@ def normalize_news(items: list[dict] | None, limit: int) -> list[dict]:
         publisher = publisher or c.get("publisher") or "unknown"
         url = ((c.get("canonicalUrl") or {}).get("url") or (c.get("clickThroughUrl") or {}).get("url")
                or c.get("link") or "")
-        published = c.get("pubDate") or c.get("displayTime")
-        if not published and c.get("providerPublishTime"):
-            published = datetime.fromtimestamp(int(c["providerPublishTime"]), tz=timezone.utc).isoformat()
-        out.append({"title": title, "publisher": publisher, "published": (published or "")[:10],
+        published = iso_utc(c.get("pubDate") or c.get("displayTime") or c.get("providerPublishTime"))
+        out.append({"title": title, "publisher": publisher, "published": published,
                     "url": url, "summary": (c.get("summary") or "")[:600]})
         if len(out) >= limit:
             break
@@ -172,6 +189,57 @@ def normalize_street(tk: Any) -> dict:
                                       for r in rec.to_dict("records")]
     except Exception:
         pass
+    return out
+
+
+QUARTER_ROWS = {   # yfinance row -> our key; first match wins per key
+    "revenue": ("Total Revenue", "Operating Revenue"), "gross_profit": ("Gross Profit",),
+    "operating_income": ("Operating Income", "Total Operating Income As Reported"), "net_income": ("Net Income",),
+    "receivables": ("Accounts Receivable", "Receivables"), "inventory": ("Inventory",),
+    "fcf": ("Free Cash Flow",), "capex": ("Capital Expenditure",),
+}
+
+
+def normalize_earnings(tk: Any) -> dict:
+    """The earnings set-up: the EPS beat/miss record, consensus for the current and next quarter and year
+    (average, low, high, number of analysts), and the last six quarters of reported results (revenue, margins,
+    receivables, inventory, free cash flow, capex). Each part is read on its own; a missing part is absent."""
+    out: dict[str, Any] = {}
+    try:
+        ed = tk.get_earnings_dates(limit=12)
+        if ed is not None and not ed.empty:
+            out["beats"] = [{"date": str(ts)[:10], "eps_est": float(r["EPS Estimate"]),
+                             "eps_actual": float(r["Reported EPS"]),
+                             "surprise_pct": float(r["Surprise(%)"]) if pd.notna(r.get("Surprise(%)")) else None}
+                            for ts, r in ed.sort_index(ascending=False).iterrows()
+                            if pd.notna(r.get("Reported EPS")) and pd.notna(r.get("EPS Estimate"))]
+    except Exception:
+        pass
+    for key, attr in (("eps_est", "earnings_estimate"), ("rev_est", "revenue_estimate")):
+        try:
+            nested = _frame_to_nested(getattr(tk, attr))
+            if nested:
+                out[key] = nested
+        except Exception:
+            pass
+    periods: dict[str, dict[str, float]] = {}
+    for attr in ("quarterly_income_stmt", "quarterly_balance_sheet", "quarterly_cashflow"):
+        try:
+            df = getattr(tk, attr)
+        except Exception:
+            continue
+        if df is None or getattr(df, "empty", True):
+            continue
+        for key, names in QUARTER_ROWS.items():
+            name = next((n for n in names if n in df.index), None)
+            if name is None:
+                continue
+            for col, v in df.loc[name].items():
+                if pd.notna(v):
+                    periods.setdefault(str(col)[:10], {}).setdefault(key, float(v))
+    if periods:
+        out["quarters"] = [{"period": p, **vals} for p, vals in sorted(periods.items(), reverse=True)
+                           if "revenue" in vals][:6]
     return out
 
 
@@ -279,6 +347,8 @@ class YFinanceProvider:
                                              on_call, "earnings_calendar", ticker),
             "street": lambda: self._cached(f"street:{ticker}:{day}:{time.strftime('%H')}", lambda: normalize_street(tk),
                                            on_call, "sell_side_research", ticker),
+            "earnings": lambda: self._cached(f"earn:{ticker}:{day}", lambda: normalize_earnings(tk), on_call,
+                                             "earnings_setup", ticker),
         }
         results: dict[str, Any] = {}
         errors: dict[str, str] = {}
@@ -295,8 +365,8 @@ class YFinanceProvider:
             benchmark=results.get("benchmark", clean_history(None)),
             info=results.get("info") or {}, income=results.get("income") or {},
             cashflow=results.get("cashflow") or {}, news=results.get("news") or [],
-            calendar=results.get("calendar") or {}, street=results.get("street") or {}, errors=errors,
-            source="yfinance")
+            calendar=results.get("calendar") or {}, street=results.get("street") or {},
+            earnings=results.get("earnings") or {}, errors=errors, source="yfinance")
 
 
 class FixtureProvider:
@@ -345,14 +415,14 @@ class FixtureProvider:
             errors["history"] = f"no fixture for {ticker}"
         bench = self.history(self.s.data.benchmark, on_call=on_call)
         parts = {n: self._json(ticker, n, {} if n != "news" else []) for n in
-                 ("info", "income", "cashflow", "news", "calendar", "street")}
+                 ("info", "income", "cashflow", "news", "calendar", "street", "earnings")}
         for n in parts:
             if on_call:
                 on_call(tool=n, ticker=ticker, ok=True, cached=True, ms=0)
         return MarketBundle(ticker=ticker, history=hist, benchmark=bench, info=parts["info"],
                             income=parts["income"], cashflow=parts["cashflow"],
                             news=parts["news"][: self.s.data.news_limit], calendar=parts["calendar"],
-                            street=parts["street"], errors=errors, source="fixtures")
+                            street=parts["street"], earnings=parts["earnings"], errors=errors, source="fixtures")
 
 
 def make_provider(settings: Settings) -> Provider:
@@ -364,7 +434,7 @@ def snapshot(bundle: MarketBundle, root: Path, benchmark: str) -> Path:
     d = root / bundle.ticker.upper()
     d.mkdir(parents=True, exist_ok=True)
     bundle.history.to_csv(d / "history.csv")
-    for name in ("info", "income", "cashflow", "news", "calendar", "street"):
+    for name in ("info", "income", "cashflow", "news", "calendar", "street", "earnings"):
         (d / f"{name}.json").write_text(json.dumps(getattr(bundle, name), indent=1, default=str), encoding="utf-8")
     bd = root / benchmark.upper()
     bd.mkdir(parents=True, exist_ok=True)

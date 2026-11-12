@@ -2,8 +2,9 @@
 
 EquityDesk researches a stock the way a small buy-side desk would. Four analysts (fundamental,
 technical, sentiment & news, risk) work in parallel from one evidence pack, while a research librarian searches the
-web for recent sell-side notes and independent research, and a fifth analyst distils what the street
-thinks. A bull and a bear
+web twice, for recent sell-side notes and for quantified industry drivers (guidance, customers' capex, market
+size), and two more analysts read the results: one distils what the street thinks, the other calls the next
+earnings report from the consensus bar, the demand data and the quality of reported earnings. A bull and a bear
 researcher then debate for a bounded number of rounds, and a portfolio manager makes the call: rating,
 conviction, horizon, drivers, risks, catalysts and invalidation. A code-run grounding check verifies
 every citation and every number before the report is accepted.
@@ -13,6 +14,11 @@ What makes it a tool and not a demo:
 - **No number comes from the model.** Indicators, risk metrics, valuation ratios, the protective stop
   and the position size are computed in code. Agents may only cite them by id (`[T.rsi14]`), and the
   grounding check rejects unknown ids, uncited claims and figures that match no evidence.
+- **Views from expectations, not from levels.** Code computes the bar for the next report (the growth the
+  consensus asks for against what the company has delivered, judged year over year so seasonality cannot
+  fool it), the beat record, next-year estimates against the run-rate and their dispersion, and
+  earnings-quality flags (receivables or inventory outrunning revenue, weak cash conversion, non-operating
+  gains). A depth check sends back PM drivers that merely restate a figure.
 - **Street research with verified sources.** Dated rating and target actions by firm, the fresh 30-day median
   target against the stale mean, and EPS-estimate revisions come from structured data. Research notes found on
   the web are kept only if the search tool actually cited their source, and every note links to it.
@@ -54,8 +60,8 @@ scripted model, at no cost, in its own data folder (`data/demo`), so it never to
 
 | Page | What it does |
 |---|---|
-| Research | Run the desk on a ticker and watch each agent finish live. Read the rating, thesis, variant view against the street, key debates, drivers and risks, the trade plan, the street research (actions, fresh targets, revisions, research notes with sources), the triaged news, a chart with stop/support/resistance, each analyst's view, the debate and the full evidence table. Ask follow-up questions in a chat that stays grounded in the report's evidence. Download Markdown or JSON. |
-| News | Headlines across the watchlist with NEW marks, a code filter for headlines that are not about the company, one-click AI triage (tone, materiality, why; about $0.01), and every sell-side action of the past weeks. |
+| Research | Run the desk on a ticker and watch each agent finish live. Read the rating, thesis, the expectations gap (the next report and next year), variant view against the street, the Earnings & demand tab (the bar, quality flags, industry figures with sources), key debates, drivers and risks, the trade plan, the street research (actions, fresh targets, revisions, research notes with sources), the triaged news, a chart with stop/support/resistance, each analyst's view, the debate and the full evidence table. Ask follow-up questions in a chat that stays grounded in the report's evidence. Download Markdown or JSON. |
+| News | Headlines across the watchlist with publish times and NEW marks, a code filter for headlines that are not about the company, AI triage of every headline (tone, materiality, why; automatic for new headlines, in batches of 20, re-asking for any the model skipped), and every sell-side action of the past weeks. |
 | Watchlist | Price, returns, RSI, trend, volatility, beta and the desk's last call for many tickers. Pure code, no tokens. Send any row to the desk. |
 | Track record | Every past call scored against the benchmark (hit rate, average excess return of buys and sells, scatter by date). |
 | Memory & profile | Your risk profile (portfolio value, risk per trade, max position, tolerance, horizon), your notes (per ticker or global, e.g. "I hold 200 NVDA at $95"), and past calls you can open or forget. |
@@ -78,7 +84,7 @@ scripted model, at no cost, in its own data folder (`data/demo`), so it never to
 ```bash
 .venv/Scripts/python -m pytest -q
 ```
-100 tests, offline and free. They cover the indicators (RSI checked against the standard reference
+115 tests, offline and free. They cover the indicators (RSI checked against the standard reference
 example), risk maths and position sizing, input guards, injection flagging, the grounding checker,
 pricing, retries, schema repair, budget stops, the memory store and outcome scoring, and the whole graph
 end to end. Failure paths covered: a failed analyst, a bounded PM revision, a budget stop followed by a
@@ -100,8 +106,9 @@ configured model (checks quality). Results go to `reports/EVAL.md` and `reports/
 
 ## Configuration
 
-Everything tunable is in `settings.yaml`: the model and per-role overrides (for example, analysts on a
-cheaper model), budgets, debate rounds and caps, revision limit, report language (English or Chinese),
+Everything tunable is in `settings.yaml`: the model and per-role or per-analyst overrides (by default the
+PM and the earnings analyst run on gpt-5.5 and the rest on gpt-4o, about $0.77 a run; `roles: {}` gives the
+all-gpt-4o desk at about $0.45; see ARCHITECTURE.md for the side-by-side that motivated this), budgets, debate rounds and caps, revision limit, report language (English or Chinese),
 grounding tolerances, data provider, benchmark, cache TTL, staleness threshold, risk-free rate and ATR
 stop multiple. Prices are in `pricing.yaml`; a model without a price line is reported as UNPRICED.
 
@@ -109,7 +116,7 @@ stop multiple. Prices are in `pricing.yaml`; a model without a price line is rep
 
 ```
 app.py                      Streamlit entry (navigation, mode, model status)
-views/                      research · watchlist · track_record · memory · runs
+views/                      research · news · watchlist · track_record · memory · runs
 equitydesk/
   config.py                 typed settings
   schemas.py                structured outputs (AnalystReport, DebateTurn, Decision)
@@ -117,7 +124,7 @@ equitydesk/
   report.py                 trade plan + Markdown report
   graph/desk.py             the LangGraph desk        graph/qa.py  follow-up Q&A graph
   harness/                  llm.py (metered client) · pricing.py · trace.py
-  tools/                    market.py · indicators.py · risk.py · fundamentals.py · evidence.py
+  tools/                    market.py · indicators.py · risk.py · fundamentals.py · earnings.py · evidence.py · news.py
   policy/                   guards.py · grounding.py
   memory/                   store.py (SQLite) · track.py (outcomes, reflection, track record)
   eval/run_eval.py          offline evaluation
@@ -139,4 +146,4 @@ tests/                      offline test suite
 
 ## 中文简介
 
-EquityDesk 是一个基于 LangGraph + Streamlit 的多智能体股票投研工具：四位分析师（基本面、技术面、情绪新闻、风险）并行分析，多空双方辩论，投资经理给出评级，最后由代码做事实校验（grounding）。所有数字都由代码计算，模型只能引用证据 ID；每次判断都会存入记忆，之后按真实走势打分，形成可追溯的历史战绩。运行 `streamlit run app.py`；没有 API key 时，在侧边栏选 “Offline demo” 即可免费体验。报告语言可在 `settings.yaml` 或界面中切换为中文。
+EquityDesk 是一个基于 LangGraph + Streamlit 的多智能体股票投研工具：四位分析师（基本面、技术面、情绪新闻、风险）并行分析，另有财报与需求分析师（从一致预期门槛、超预期记录、行业需求数据和盈利质量判断下一次财报）和卖方研究分析师，多空双方辩论，投资经理给出评级，最后由代码做事实校验（grounding）。所有数字都由代码计算，模型只能引用证据 ID；每次判断都会存入记忆，之后按真实走势打分，形成可追溯的历史战绩。运行 `streamlit run app.py`；没有 API key 时，在侧边栏选 “Offline demo” 即可免费体验。报告语言可在 `settings.yaml` 或界面中切换为中文。

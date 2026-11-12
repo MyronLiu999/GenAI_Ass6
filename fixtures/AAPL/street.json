@@ -802,11 +802,11 @@
   }
  ],
  "price_targets": {
-  "current": 354.725,
-  "high": 405.0,
+  "current": 355.63,
+  "high": 425.0,
   "low": 250.0,
-  "mean": 340.7655,
-  "median": 350.0
+  "mean": 344.6155,
+  "median": 352.5
  },
  "eps_trend": {
   "0q": {
@@ -831,8 +831,8 @@
    "90daysAgo": 8.79768
   },
   "+1y": {
-   "current": 10.52199,
-   "7daysAgo": 10.8295,
+   "current": 10.57942,
+   "7daysAgo": 10.55431,
    "30daysAgo": 10.82977,
    "60daysAgo": 10.82262,
    "90daysAgo": 10.72183
@@ -867,19 +867,19 @@
  "growth": {
   "0q": {
    "stockTrend": 0.5752,
-   "indexTrend": 0.28959998
+   "indexTrend": 0.2916
   },
   "+1q": {
    "stockTrend": 0.0708,
-   "indexTrend": 0.2711
+   "indexTrend": 0.2734
   },
   "0y": {
    "stockTrend": 0.2599,
-   "indexTrend": 0.33290002
+   "indexTrend": 0.3334
   },
   "+1y": {
    "stockTrend": 0.122600004,
-   "indexTrend": 0.16690001
+   "indexTrend": 0.1667
   },
   "LTG": {
    "indexTrend": 0.122
@@ -911,20 +911,20 @@
    "growth": 0.2599
   },
   "+1y": {
-   "avg": 10.52199,
+   "avg": 10.57942,
    "low": 8.57,
-   "high": 11.61414,
+   "high": 12.2,
    "yearAgoEps": 8.83793,
    "numberOfAnalysts": 35.0,
-   "growth": 0.19049999
+   "growth": 0.19700001
   }
  },
  "recommendations": [
   {
    "period": "0m",
    "strongBuy": 6,
-   "buy": 19,
-   "hold": 14,
+   "buy": 20,
+   "hold": 13,
    "sell": 3,
    "strongSell": 3
   },

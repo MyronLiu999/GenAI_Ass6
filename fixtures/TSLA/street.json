@@ -802,7 +802,7 @@
   }
  ],
  "price_targets": {
-  "current": 391.812,
+  "current": 390.84,
   "high": 600.0,
   "low": 128.11,
   "mean": 412.47626,
@@ -867,19 +867,19 @@
  "growth": {
   "0q": {
    "stockTrend": 0.0002,
-   "indexTrend": 0.28959998
+   "indexTrend": 0.2916
   },
   "+1q": {
    "stockTrend": 0.122,
-   "indexTrend": 0.2711
+   "indexTrend": 0.2734
   },
   "0y": {
    "stockTrend": 0.0387,
-   "indexTrend": 0.33290002
+   "indexTrend": 0.3334
   },
   "+1y": {
    "stockTrend": 0.2523,
-   "indexTrend": 0.16690001
+   "indexTrend": 0.1667
   },
   "LTG": {
    "indexTrend": 0.122

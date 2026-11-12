@@ -19,7 +19,8 @@ def test_full_run(make_desk):
     nodes = [e["node"] for e in events if e["type"] == "node"]
     assert nodes[:2] == ["collect_data", "recall_memory"]
     assert set(nodes[2:7]) == {"fundamental", "technical", "sentiment", "risk", "web_research"}   # fan-out
-    assert nodes[7:] == ["street", "bull", "bear", "bull", "bear", "pm", "grounding", "finalize"]
+    assert set(nodes[7:9]) == {"street", "earnings"}                                              # after research
+    assert nodes[9:] == ["bull", "bear", "bull", "bear", "pm", "grounding", "finalize"]
     done = events[-1]
     assert done["type"] == "done"
     rep = done["report"]
@@ -41,8 +42,16 @@ def test_full_run(make_desk):
     types = {e["type"] for e in trace}
     assert {"run_start", "tool_call", "node_start", "node_end", "llm_call", "grounding", "memory_read",
             "memory_write", "run_end"} <= types
-    # 4 analysts + web search + note extraction + street analyst + 4 debate turns + PM
-    assert sum(1 for e in trace if e["type"] == "llm_call") == 4 + 2 + 1 + 4 + 1
+    # 4 analysts + 2 web searches + 2 extractions + street and earnings analysts + 4 debate turns + PM
+    assert sum(1 for e in trace if e["type"] == "llm_call") == 4 + 2 + 2 + 2 + 4 + 1
+    # earnings set-up and industry drivers reach the evidence, the earnings analyst and the PM
+    ids = {f["id"] for f in rep["facts"]}
+    assert {"E.q_bar", "E.q_rev_implied_qoq", "Q.rev_qoq_path", "Q.quality_flags", "D.1", "D.2"} <= ids
+    assert research["drivers"] and all(d["url"].startswith("https://example.com/") for d in research["drivers"])
+    earn = rep["analysts"]["earnings"]
+    assert earn["setup_call"] == "in line" and "E.q_bar" in earn["setup_view"] and earn["grounding"]["passed"]
+    assert "E.q_bar" in rep["decision"]["expectations_gap"]
+    assert rep["grounding"]["depth_ok"] and not rep["grounding"]["shallow_drivers"]
     assert any(e["type"] == "guard" and e.get("rule") == "provenance" for e in trace)
 
 
@@ -148,3 +157,15 @@ def test_follow_up_qa_keeps_its_thread(make_desk):
     qa.ask(run_id, rep, "And the RSI?")
     hist = ReportQA(make_desk()).history(run_id, rep)       # a fresh instance reads it from the checkpoint
     assert [r for r, _ in hist] == ["user", "assistant", "user", "assistant"]
+
+
+def test_shallow_drivers_trigger_one_revision_without_failing_grounding(make_desk):
+    desk = make_desk(ScriptedBackend(shallow_once=True))
+    run_id, events = run(desk, rounds=1)
+    nodes = [e["node"] for e in events if e["type"] == "node"]
+    assert nodes[-5:] == ["pm", "grounding", "pm", "grounding", "finalize"]
+    first = [e for e in read_trace(run_id, desk.s.runs_dir) if e["type"] == "grounding" and e["node"] == "pm"][0]
+    assert first["passed"] and first["retry"] and not first["depth_ok"] and len(first["shallow_drivers"]) == 2
+    assert "restate one figure" in first["feedback"]
+    g = events[-1]["report"]["grounding"]
+    assert g["passed"] and g["depth_ok"] and g["revisions"] == 1

@@ -112,4 +112,8 @@ def test_env_file_overrides_placeholder_but_not_real_values(tmp_path, monkeypatc
 def test_role_overrides(settings):
     s = settings.model_copy(update={"roles": {"analyst": {"name": "cheap"}}})
     assert s.model_for("analyst").name == "cheap" and s.model_for("pm").name == "scripted"
+    s = settings.model_copy(update={"roles": {"analyst": {"name": "cheap"},
+                                              "earnings": {"name": "smart", "reasoning_effort": "low"}}})
+    assert s.model_for("analyst", "earnings").name == "smart" and s.model_for("analyst", "earnings").reasoning_effort == "low"
+    assert s.model_for("analyst", "technical").name == "cheap"
     assert s.clamp_rounds(99) == s.graph.max_debate_rounds and s.clamp_rounds(0) == 1

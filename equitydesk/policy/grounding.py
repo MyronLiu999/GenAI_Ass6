@@ -16,7 +16,7 @@ CITE_RE = re.compile(r"\[\s*([A-Z]\.[A-Za-z0-9_]+(?:\s*[,;]\s*[A-Z]\.[A-Za-z0-9_
 ID_RE = re.compile(r"[A-Z]\.[A-Za-z0-9_]+")
 # Figures resting on sell-side estimates; when S.consensus_check flags them as stale they may not drive a call.
 ESTIMATE_IDS = {"F.pe_fwd", "F.peg", "S.target_mean", "S.target_upside", "S.analyst_rec", "A.target_median",
-                "A.target_high", "A.target_low"}   # fresh-target facts (A.fresh_*) stay allowed
+                "A.target_high", "A.target_low", "E.pe_ny"}   # fresh-target facts (A.fresh_*) stay allowed
 
 
 def cite_ids(text: str) -> list[str]:
@@ -167,12 +167,13 @@ def check_points(points: list[dict], facts: dict[str, Fact], cfg: GroundingCfg, 
     return rep
 
 
-POINT_LISTS = ("points", "street_bull", "street_bear", "recent_changes")   # every cited-point list a report has
+POINT_LISTS = ("points", "street_bull", "street_bear", "recent_changes", "demand_drivers", "quality_flags")   # every cited-point list a report has
 
 
 def check_analyst(report: dict, facts: dict[str, Fact], cfg: GroundingCfg) -> GroundingReport:
     points = [p for k in POINT_LISTS for p in report.get(k) or []]
-    extra = " ".join([report.get("summary", ""), report.get("consensus_view", ""), *(report.get("key_debates") or [])])
+    extra = " ".join([report.get("summary", ""), report.get("consensus_view", ""), report.get("setup_view", ""),
+                      *(report.get("key_debates") or [])])
     rep = check_points(points, facts, cfg, extra_text=extra)
     rep.passed = rep.passed and len(rep.ungrounded_numbers) <= cfg.max_ungrounded_numbers
     return rep
@@ -182,7 +183,8 @@ def check_decision(decision: dict, facts: dict[str, Fact], cfg: GroundingCfg) ->
     drivers = list(decision.get("drivers") or [])
     points = drivers + list(decision.get("risks") or [])
     extra = " ".join([decision.get("thesis", ""), decision.get("override_rationale", ""),
-                      decision.get("variant_view", ""), *(decision.get("key_debates") or []),
+                      decision.get("variant_view", ""), decision.get("expectations_gap", ""),
+                      *(decision.get("key_debates") or []),
                       *(decision.get("invalidation") or []), *(decision.get("catalysts") or [])])
     rep = check_points(points, facts, cfg, extra_text=extra)
     if "S.consensus_check" in facts:
@@ -190,7 +192,8 @@ def check_decision(decision: dict, facts: dict[str, Fact], cfg: GroundingCfg) ->
                              if (set(d.get("evidence") or []) | set(cite_ids(d.get("claim", "")))) & ESTIMATE_IDS]
         # Live finding: barred from the drivers, the PM moved the same stale-estimate argument into a key
         # debate. Anywhere in the prose, a sentence citing those estimates must carry the caveat.
-        prose = [decision.get("thesis", ""), decision.get("variant_view", ""), *(decision.get("key_debates") or [])]
+        prose = [decision.get("thesis", ""), decision.get("variant_view", ""), decision.get("expectations_gap", ""),
+                 *(decision.get("key_debates") or [])]
         for sentence in (x for p in prose for x in SENTENCE.split(p)):
             if set(cite_ids(sentence)) & ESTIMATE_IDS and not CAVEAT.search(sentence):
                 rep.stale_drivers.append(sentence.strip())
@@ -199,18 +202,42 @@ def check_decision(decision: dict, facts: dict[str, Fact], cfg: GroundingCfg) ->
     return rep
 
 
-SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
+SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z])|(?<=[。！？；])")      # English and Chinese sentence ends
 CAVEAT = re.compile(r"\b(stale|lag|lags|lagging|provisional|outdated|not yet (reflect|caught)|may not (yet )?reflect|"
-                    r"before the (drop|fall|move|sell-off|rally)|unreliable|out of date|catch up)\b", re.I)
+                    r"before the (drop|fall|move|sell-off|rally)|unreliable|out of date|catch up)\b"
+                    r"|滞后|过时|陈旧|暂定|未必可靠|不可靠|尚未(充分)?(反映|更新|跟上|调整)|可能(还)?未(能)?(充分)?(反映|更新|跟上)",
+                    re.I)
 # Boilerplate a desk head would send back. Reported as a quality warning; it never fails the check alone.
 GENERIC = re.compile(r"\b(presents a mixed (investment )?(case|picture)|mixed (investment )?(case|picture|outlook)|"
                      r"both (opportunities|risks) and (risks|opportunities)|it remains to be seen|only time will tell|"
                      r"warrants a cautious approach)\b", re.I)
 
 
+GENERIC_ZH = re.compile(r"喜忧参半|机遇与(风险|挑战)并存|(风险|挑战)与机遇并存|有待观察|值得谨慎|显示出(其)?(强劲|卓越|良好|强大)|"
+                        r"依然强劲|增长势头强劲|表现出色")
+# A driver that restates a figure ("margins of X% show strong profitability") instead of making an inference.
+RESTATE = re.compile(r"\b(showing|shows|demonstrat\w*|showcas\w*|indicat\w* (strong|robust|solid)|highlight\w* (its|the) "
+                     r"(strong|robust)|reflect\w* (its|the) (strong|robust))\b", re.I)
+
+
 def generic_phrases(decision: dict) -> list[str]:
-    return sorted({m.group(0) for m in GENERIC.finditer(" ".join([decision.get("thesis", ""),
-                                                                  decision.get("variant_view", "")]))})
+    text = " ".join([decision.get("thesis", ""), decision.get("variant_view", ""),
+                     *(d.get("claim", "") for d in decision.get("drivers") or [])])
+    return sorted({m.group(0) for m in GENERIC.finditer(text)} | {m.group(0) for m in GENERIC_ZH.finditer(text)})
+
+
+def shallow_drivers(decision: dict) -> list[str]:
+    """Drivers that cite fewer than two facts, or facts from a single category, or that read as a restatement.
+    A desk head sends these back: a reason for a rating connects evidence and says what follows."""
+    out = []
+    for d in decision.get("drivers") or []:
+        claim = d.get("claim", "")
+        ids = set(d.get("evidence") or []) | set(cite_ids(claim))
+        cats = {i.split(".", 1)[0] for i in ids}
+        restates = bool(RESTATE.search(claim) or GENERIC_ZH.search(claim)) and len(cats) < 3
+        if len(ids) < 2 or len(cats) < 2 or restates:
+            out.append(claim)
+    return out
 
 
 def consistency_warnings(decision: dict, analyst_reports: dict[str, dict]) -> list[str]:
