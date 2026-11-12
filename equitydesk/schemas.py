@@ -79,7 +79,8 @@ class DriverItem(BaseModel):
                   "competition", "expectations", "regulation", "other"]
     metric: str = Field(description="What is measured, e.g. 'Combined 2026 capex guidance of the four largest "
                                     "US cloud providers'.")
-    figure: str = Field(description="The figure exactly as the source states it, e.g. '$400 billion' or '+30%'.")
+    figure: str = Field(description=("The number as the source states it, with currency and unit, abbreviated and "
+                                     "with no words around it, e.g. '$400B', '$1.3T', '+30%'."))
     period: str = Field(default="", description="The period it refers to, e.g. 'calendar 2026'.")
     context: str = Field(default="", description="One sentence: why the source says it matters for the company.")
 

@@ -83,8 +83,33 @@ def esc(x) -> str:
     return html.escape("" if x is None else str(x))
 
 
-def rich(text: str) -> str:
-    """Escaped text with citations rendered as small id tags."""
+CITE_RUN = re.compile(r"\s*(?:" + CITE.pattern + r"\s*)+")      # one or more citations, with the space before
+
+
+def show_cites() -> bool:
+    """Evidence ids in prose are hidden unless the sidebar switch is on (the Evidence tab and the downloaded
+    report always keep them)."""
+    from streamlit import runtime
+    if not runtime.exists():   # outside a Streamlit session (tests, scripts): keep them
+        return True
+    return bool(st.session_state.get("show_cites", False))
+
+
+def strip_cites(text: str) -> str:
+    """'risk [D.1][Q.flags]。' -> 'risk。' ; 'margin [F.gm], and' -> 'margin, and'."""
+    return CITE_RUN.sub(lambda m: "" if m.end() == len(m.string) or not m.string[m.end()].isalnum() else " ",
+                        text or "").strip()
+
+
+def cite_tag(fid: str | None) -> str:
+    """One evidence-id tag, shown only when the sidebar switch is on."""
+    return f' <span class="ed-cite">{esc(fid)}</span>' if fid and show_cites() else ""
+
+
+def rich(text: str, cites: bool | None = None) -> str:
+    """Escaped text; citations shown as small id tags when `cites` (default: the sidebar switch), else removed."""
+    if not (show_cites() if cites is None else cites):
+        return esc(strip_cites(text))
     return CITE.sub(lambda m: "".join(f'<span class="ed-cite">{i.strip()}</span>' for i in re.split(r"[,;]", m.group(1))),
                     esc(text))
 
@@ -178,7 +203,7 @@ def note_card(n: dict) -> None:
         (chip(n["rating"], "blue") if n.get("rating") else "") + (chip(tgt, "amber") if tgt else "") + \
         (chip("ratings table: no reasoning", "slate") if n.get("aggregator") else "")
     pts = "<ul>" + "".join(f"<li>{esc(p)}</li>" for p in n.get("key_points") or []) + "</ul>" if n.get("key_points") else ""
-    card(esc(n.get("source", "Research")) + (f' <span class="ed-cite">{esc(n["fact_id"])}</span>' if n.get("fact_id") else ""),
+    card(esc(n.get("source", "Research")) + cite_tag(n.get("fact_id")),
          f"<div>{chips}</div><p>{esc(n.get('thesis', ''))}</p>{pts}",
          accent={"green": "green", "red": "red"}.get(tone, "slate"),
          meta=f"{esc(n.get('date', ''))} · {esc(n.get('domain', ''))} · {link(n.get('url', ''), n.get('title') or 'read')}")
@@ -197,7 +222,7 @@ def driver_card(d: dict) -> None:
             + (f' <span class="ed-muted">· {esc(d["period"])}</span>' if d.get("period") else "") + "</div>")
     body = f"<div>{chip(kind, DRIVER_TONE.get(kind, 'slate'))}</div>{head}" + \
         (f"<p>{esc(d['context'])}</p>" if d.get("context") else "")
-    card(esc(d.get("source", "Source")) + (f' <span class="ed-cite">{esc(d["fact_id"])}</span>' if d.get("fact_id") else ""),
+    card(esc(d.get("source", "Source")) + cite_tag(d.get("fact_id")),
          body, accent="slate",
          meta=f"{esc(d.get('date', ''))} · {esc(d.get('domain', ''))} · {link(d.get('url', ''), d.get('title') or 'read')}")
 

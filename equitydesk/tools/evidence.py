@@ -8,6 +8,7 @@ verifies every citation and every number against this pack.
 
 from __future__ import annotations
 
+import re
 from datetime import date
 from typing import Any
 
@@ -393,6 +394,17 @@ def street_facts(street: dict, price: float, today: str) -> list[Fact]:
         if "-3m" in recs:
             p.add("A.bull_share_3m_ago", "Share of buy or strong-buy ratings 3 months ago", bull_share(recs["-3m"]), "%")
     return p.facts
+
+
+UNIT_WORDS = re.compile(r"(\d)[\s\u00a0\u202f]*(trillion|billion|million|bn)\b", re.I)
+UNIT_ABBR = {"trillion": "T", "billion": "B", "bn": "B", "million": "M"}
+
+
+def abbreviate_units(text: str) -> str:
+    """'$108 billion ±2%' -> '$108B ±2%': the same number, written the way the report language can quote it
+    without copying English words. Values never change, so the grounding check is unaffected."""
+    text = UNIT_WORDS.sub(lambda m: m.group(1) + UNIT_ABBR[m.group(2).lower()], text or "")
+    return text.replace("\u202f", " ").replace("\u00a0", " ")
 
 
 def driver_facts(items: list[dict]) -> list[Fact]:

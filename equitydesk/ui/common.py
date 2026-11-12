@@ -67,9 +67,14 @@ def model_status(d: Desk) -> tuple[bool, str]:
     return ok, f"{cfg.provider} · {label}" + ("" if ok else f" · {env} missing or invalid")
 
 
-def md(text: str) -> str:
-    """Safe for st.markdown: '$' would start LaTeX; citations become inline code."""
-    return CITE.sub(r"`\1`", (text or "").replace("$", "\\$"))
+def md(text: str, cites: bool | None = None) -> str:
+    """Safe for st.markdown: '$' would start LaTeX; citations become inline code, or are removed when the
+    sidebar switch hides evidence ids."""
+    from equitydesk.ui.components import show_cites, strip_cites
+    text = text or ""
+    if not (show_cites() if cites is None else cites):
+        text = strip_cites(text)
+    return CITE.sub(r"`\1`", text.replace("$", "\\$"))
 
 
 def open_report(run_id: str) -> None:

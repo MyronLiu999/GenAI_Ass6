@@ -161,3 +161,14 @@ def test_consistency_warnings():
     assert not consistency_warnings({"rating": "STRONG_BUY", "override_rationale": "Because."}, analysts)
     spread = consistency_warnings({"rating": "HOLD"}, {"a": {"score": 0.8}, "b": {"score": -0.6}, "c": {"score": 0.0}})
     assert any("disagree" in x for x in spread)
+
+
+def test_report_language_check():
+    from equitydesk.policy.grounding import language_ok
+    zh = {"summary": "NVIDIA的门槛偏低 [E.q_bar]，Morgan Stanley维持Overweight，EPS连续8个季度超预期。",
+          "points": [{"claim": "应收账款同比增长127% [Q.receivables_yoy]，快于收入。", "evidence": ["Q.receivables_yoy"]}]}
+    en = {"summary": "NVIDIA's stock faces significant pressure due to recent controversies [N.2].",
+          "points": [{"claim": "Short interest is low at 1.2% [S.short_float].", "evidence": ["S.short_float"]}],
+          "headlines": [{"id": "N.2", "why": "CEO controversy could hurt the valuation."}]}
+    assert language_ok(zh, "Chinese") and not language_ok(en, "Chinese")
+    assert language_ok(en, "English") and language_ok({}, "Chinese")

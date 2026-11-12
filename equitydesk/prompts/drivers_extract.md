@@ -10,8 +10,10 @@ customers' spending, then market size, supply and pricing, competition.
 Rules (checked by code):
 1. source_ids: the [S<n>] markers the figure comes from. Required: an item whose markers do not appear in the
    source table is discarded.
-2. figure: copy it exactly as the digest states it, with its unit and currency ("$400 billion", "+30%",
-   "$54.0 billion ±2%"). Never compute, convert, sum or round a figure. Skip claims that carry no figure.
+2. figure: the number exactly as the digest states it, with its currency and unit, abbreviated and with no
+   words around it ("$400B", "$1.3T", "+30%", "$54.0B ±2%", "11.25M units"). Qualifiers such as "over", "about"
+   or "through" go into metric or period, in $language. Never compute, convert, sum or round a figure. Skip
+   claims that carry no figure.
 3. metric names what is measured precisely enough to stand alone; period says what period it covers.
 4. context is the source's reason the figure matters for $company, not your opinion.
-5. Write metric and context in $language; keep firm names, tickers and figures as given.
+5. Write metric, period and context in $language (translate, do not copy English phrases); keep firm names, tickers and figures as given.

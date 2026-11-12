@@ -135,3 +135,13 @@ def test_triage_runs_one_ticker_per_call_and_names_the_company(settings, tmp_pat
     assert len(b.systems) == 2
     assert "feed of NVDA (NVIDIA Corporation)" in b.systems[0] and "Amazon" not in b.systems[0]
     assert "feed of AMZN (Amazon.com, Inc.)" in b.systems[1] and "NVIDIA" not in b.systems[1]
+
+
+def test_citations_can_be_hidden_in_prose():
+    from equitydesk.ui.components import rich, strip_cites
+    zh = "这个判断依赖于财报收入至少贴近$109.0B共识 [S.next_earnings][E.q_rev_cons] [N.2]。下一年方面[E.ny_rev_cons]，分歧大。"
+    assert strip_cites(zh) == "这个判断依赖于财报收入至少贴近$109.0B共识。下一年方面，分歧大。"
+    en = "The bar is low [E.q_bar, Q.rev_qoq_avg] and beats are routine [E.beat_record]."
+    assert strip_cites(en) == "The bar is low and beats are routine."
+    assert "ed-cite" not in rich(en, cites=False) and rich(en, cites=True).count("ed-cite") == 3
+    assert rich("<b>x</b> [T.price]", cites=False) == "&lt;b&gt;x&lt;/b&gt;"

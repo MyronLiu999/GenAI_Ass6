@@ -130,3 +130,11 @@ def test_a_seasonal_receivables_build_is_not_a_flag():
     f = facts(earn)
     assert f["Q.receivables_qoq"].value == pytest.approx(40.0)
     assert "receivables" not in f.get("Q.quality_flags").value
+
+
+def test_unit_words_are_abbreviated_without_changing_values():
+    from equitydesk.tools.evidence import abbreviate_units
+    assert abbreviate_units("$108\u202fbillion ±2%") == "$108B ±2%"
+    assert abbreviate_units("from $800 billion to $1.3 trillion, 11.25 million units, $5bn") == \
+        "from $800B to $1.3T, 11.25M units, $5B"
+    assert abbreviate_units("a billion reasons") == "a billion reasons"          # no number, no change

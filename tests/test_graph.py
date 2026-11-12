@@ -169,3 +169,16 @@ def test_shallow_drivers_trigger_one_revision_without_failing_grounding(make_des
     assert "restate one figure" in first["feedback"]
     g = events[-1]["report"]["grounding"]
     assert g["passed"] and g["depth_ok"] and g["revisions"] == 1
+
+
+def test_wrong_language_prose_is_asked_for_once_more(make_desk):
+    """The scripted model always answers in English: in a Chinese run every analyst and debate turn is re-asked
+    exactly once, and the run still completes."""
+    desk = make_desk()
+    run_id = desk.start("DEMO", 1, "Chinese")
+    events = list(desk.stream(run_id))
+    assert events[-1]["report"]["status"] == "ok"
+    trace = read_trace(run_id, desk.s.runs_dir)
+    guarded = [e["node"] for e in trace if e["type"] == "guard" and e.get("rule") == "report_language"]
+    assert sorted(guarded) == sorted(["fundamental", "technical", "sentiment", "risk", "street", "earnings",
+                                      "bull", "bear"])

@@ -287,7 +287,7 @@ with tabs[2]:
         rows = []
         for f in actions:
             label, tone = ui.action_tone(f.value)
-            rows.append(ui.news_row(f.as_of, f.value, "", f'<span class="ed-cite">{f.id}</span>', ui.chip(label, tone)))
+            rows.append(ui.news_row(f.as_of, f.value, "", ui.cite_tag(f.id).strip(), ui.chip(label, tone)))
         ui.html_block('<div class="ed-card">' + "".join(rows) + "</div>")
     ui.section(f"Research notes found on the web · {len(research.get('notes', []))} kept with verified sources"
                + (f" · {research['dropped']} dropped" if research.get("dropped") else ""))
@@ -323,7 +323,7 @@ with tabs[3]:
         if f.flagged:
             chips += ui.chip("injection attempt flagged", "red")
         rows.append(ui.news_row(f.as_of, f.label, f.url, f"{ui.esc(f.value)} · {ui.esc(h.get('why', ''))} "
-                                f'<span class="ed-cite">{f.id}</span>', chips))
+                                + ui.cite_tag(f.id).strip(), chips))
     ui.html_block('<div class="ed-card">' + ("".join(rows) or "<p class='ed-muted'>No headlines.</p>") + "</div>")
     st.caption("Track headlines across your whole watchlist on the News page.")
 

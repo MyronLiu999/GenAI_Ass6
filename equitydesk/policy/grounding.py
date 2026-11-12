@@ -256,3 +256,29 @@ def consistency_warnings(decision: dict, analyst_reports: dict[str, dict]) -> li
     if len(scores) >= 3 and (max(scores) - min(scores)) >= 1.2:
         warn.append("Analysts strongly disagree (score spread >= 1.2); treat conviction with care.")
     return warn
+
+
+# -- report language ----------------------------------------------------------------------------
+CJK = re.compile(r"[一-鿿]")
+LATIN = re.compile(r"[A-Za-z]")
+MIN_CJK_PER_LATIN = 0.4      # Chinese prose with tickers, firm names and "EPS" inside sits far above this
+
+
+def prose_of(report: dict) -> list[str]:
+    """Every prose field an agent writes (analyst report, debate turn or decision)."""
+    texts = [report.get(k) or "" for k in ("summary", "consensus_view", "setup_view", "argument", "rebuttal",
+                                          "thesis", "expectations_gap", "variant_view", "memory_note")]
+    texts += list(report.get("key_debates") or []) + list(report.get("invalidation") or [])
+    texts += [p.get("claim", "") for k in (*POINT_LISTS, "drivers", "risks") for p in report.get(k) or []]
+    texts += [h.get("why", "") for h in report.get("headlines") or []]
+    return texts
+
+
+def language_ok(report: dict, language: str) -> bool:
+    """False when Chinese was asked for and the prose is mostly English (live finding: the sentiment analyst
+    wrote a whole report in English in a Chinese run). English reports are not checked."""
+    if language != "Chinese":
+        return True
+    text = ID_RE.sub(" ", CITE_RE.sub(" ", " ".join(prose_of(report))))
+    cjk, latin = len(CJK.findall(text)), len(LATIN.findall(text))
+    return latin == 0 or cjk >= MIN_CJK_PER_LATIN * latin

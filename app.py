@@ -24,6 +24,9 @@ with st.sidebar:
                f"Web research: {'on' if d.s.research.web_search else 'off'} ({d.s.research.context_size} context)")
     if not ok:
         st.caption("Add the key to `.env` (see `.env.example`), then press Reload — or switch to the offline demo.")
+    st.toggle("Show evidence ids", key="show_cites",
+              help="Show the evidence id behind each claim (e.g. E.q_bar) in the report text. Every id is checked by "
+                   "code either way; the Evidence tab and the downloaded report always keep them.")
     if st.button("Reload settings", icon=":material/refresh:", help="Re-read settings.yaml, pricing.yaml and .env"):
         reload_settings()
         st.rerun()

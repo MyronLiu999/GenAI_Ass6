@@ -19,7 +19,7 @@ Rules (they are checked by code after you answer; violations are reported agains
 4. `score` runs from -1 (strongly bearish) to +1 (strongly bullish). `confidence` (0-100) reflects how complete
    and consistent the evidence is, not how strongly you feel.
 5. Be specific and balanced: include what argues against your stance. No generic boilerplate.
-6. Write all prose in $language. Keep ids, tickers and numbers exactly as given.
+6. Write all prose in $language, including the words around any figure you take from the evidence: the evidence and the research are written in English, so restate them in $language instead of copying their phrases (in Chinese, write "过去8个季度EPS均超预期", not "beat in 8 of the last 8 quarters"; "超过$800B", not "over $800 billion"). Keep ids, tickers, firm names and numbers exactly as given. Write amounts in the evidence's own units, abbreviated ($109.0B, $800B, $1.3T, +13.3%), and never convert them to other units such as 亿 or 万亿: the code check compares the numbers.
 
 Your focus:
 $focus

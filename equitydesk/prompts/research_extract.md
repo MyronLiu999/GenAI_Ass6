@@ -12,4 +12,4 @@ Rules (checked by code):
 3. thesis and key_points state the researcher's reasoning, not yours. stance is the researcher's stance.
 4. Skip anything that is not about $ticker, and anything older than $days days when the digest dates it.
 5. debates: the questions the sources say investors disagree on, each ending with its [S<n>] marker(s).
-6. Write prose in $language; keep firm names, tickers and numbers as given.
+6. Write thesis, key points and debates in $language, translating the source's wording rather than copying English phrases; keep firm names, tickers, ratings and numbers as given.

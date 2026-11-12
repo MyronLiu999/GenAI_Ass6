@@ -38,12 +38,13 @@ from equitydesk.harness.trace import Tracer
 from equitydesk.memory.store import Store
 from equitydesk.memory.track import outcome, recall_text
 from equitydesk.policy.grounding import (POINT_LISTS, check_analyst, check_decision, consistency_warnings,
-                                        generic_phrases, normalize_point, normalize_text, shallow_drivers)
+                                        generic_phrases, language_ok, normalize_point, normalize_text,
+                                        shallow_drivers)
 from equitydesk.policy.provenance import verify_notes
 from equitydesk.policy.guards import DISCLAIMER
 from equitydesk.report import build_plan, render_markdown
 from equitydesk.schemas import SCHEMAS, DebateTurn, Decision, DriverNotes, ResearchNotes
-from equitydesk.tools.evidence import Fact, build_facts, driver_facts, index, render, web_facts
+from equitydesk.tools.evidence import Fact, abbreviate_units, build_facts, driver_facts, index, render, web_facts
 from equitydesk.tools.market import Provider
 
 PROMPTS = Path(__file__).resolve().parent.parent / "prompts"
@@ -174,6 +175,18 @@ def build_graph(rt: Runtime) -> StateGraph:
             tracer.event("memory_read", prior_calls=len(prior), notes=len(notes))
             return {"memory": {"prior": prior, "notes": notes, "text": recall_text(prior, notes)}}
 
+    def in_language(node: str, role: str, schema, system: str, user: str, out: dict, state: DeskState) -> dict:
+        """One re-ask when the prose came back in the wrong language. The second answer is kept either way."""
+        lang = state.get("language", "English")
+        if language_ok(out, lang):
+            return out
+        tracer.event("guard", rule="report_language", node=node, language=lang)
+        retry = (user + "\n\n<language_feedback>Your previous answer was written in English, but this report "
+                 f"must be in {lang}. Return the same {schema.__name__} with every prose field rewritten in {lang}; "
+                 "keep ids, tickers, firm names and numbers exactly as they are.\nPrevious answer:\n"
+                 + json.dumps(out, ensure_ascii=False) + "\n</language_feedback>")
+        return LLM.dump(llm.structured(node, role, schema, system, retry))
+
     # -- the four analysts -----------------------------------------------------------------------
     def analyst(name: str) -> Callable[[DeskState], dict]:
         role = spec[name]
@@ -189,6 +202,7 @@ def build_graph(rt: Runtime) -> StateGraph:
                         + f"\n\nReturn your {schema.__name__}.")
                 try:
                     rep = LLM.dump(llm.structured(name, "analyst", schema, system, user))
+                    rep = in_language(name, "analyst", schema, system, user, rep, state)
                     for k in POINT_LISTS:
                         if k in rep:
                             rep[k] = [normalize_point(p) for p in rep[k]]
@@ -284,6 +298,8 @@ def build_graph(rt: Runtime) -> StateGraph:
                                    value=" | ".join(debates)[:1200], source="web research"))
             for f, n in zip(wf, notes):
                 n["fact_id"] = f.id
+            drivers = [{**n, **{k: abbreviate_units(n.get(k) or "") for k in ("figure", "metric", "period", "context")}}
+                       for n in drivers]
             df = driver_facts(drivers)
             for f, n in zip(df, drivers):
                 n["fact_id"] = f.id
@@ -307,6 +323,7 @@ def build_graph(rt: Runtime) -> StateGraph:
                                     render_debate(state.get("debate", [])), render(state["facts"]),
                                     f"Return your DebateTurn for the {side.upper()} side."])
                 turn = LLM.dump(llm.structured(side, "debate", DebateTurn, system, user))
+                turn = in_language(side, "debate", DebateTurn, system, user, turn, state)
                 turn["points"] = [normalize_point(p) for p in turn["points"]]
                 turn["argument"], turn["rebuttal"] = normalize_text(turn["argument"]), normalize_text(turn["rebuttal"])
                 out: dict = {"debate": [{"side": side, "round": rnd, **turn}]}
