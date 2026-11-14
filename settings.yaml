@@ -27,6 +27,8 @@ model:
 roles:
   pm: {name: gpt-5.5, temperature: null, reasoning_effort: medium, max_tokens: 16000, timeout_s: 300}
   earnings: {name: gpt-5.5, temperature: null, reasoning_effort: medium, max_tokens: 12000, timeout_s: 240}
+  monitor: {name: gpt-4o-mini, max_tokens: 4000}   # scores and translates every headline: cheap and fast
+  monitor_overview: {name: gpt-4o, max_tokens: 3000}  # the monitor's overview, every couple of hours
 
 # Hard ceilings enforced by the harness (equitydesk/harness/llm.py) before every call.
 budget:
@@ -65,6 +67,25 @@ research:
   context_size: medium         # low | medium | high: how much page content the search reads (cost scales)
   max_notes: 8
   lookback_days: 60
+
+# Market monitor: `python -m equitydesk.monitor` (or double-click start_monitor.bat) runs in the background,
+# collects official releases, media, per-stock news, retail sentiment and prediction markets every minute,
+# scores every item with the `monitor` model, pushes the important ones and writes short sourced reports on
+# big events. A daily cost ceiling stops all model calls (collection carries on) once reached.
+monitor:
+  interval_s: 60
+  language: Chinese
+  push_min_score: 8
+  push_holding_min_score: 7
+  report_min_score: 8
+  max_reports_per_day: 6
+  daily_cost_ceiling_usd: 2.0
+  overview_every_min: 120
+  polymarket_queries: ["Fed decision", "recession", "tariffs"]
+  kalshi_series: [KXFEDDECISION]
+  notify:
+    desktop: true
+    ntfy_topic: ""             # set a hard-to-guess topic and subscribe to it in the ntfy phone app for phone push
 
 paths:
   data_dir: data               # cache, SQLite stores, run traces (git-ignored)

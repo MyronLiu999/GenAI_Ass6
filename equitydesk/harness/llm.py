@@ -304,6 +304,16 @@ class ScriptedBackend:
                                                 kind="customer spending", metric="Demo customer capex guidance",
                                                 figure="$100 billion", period="2026",
                                                 context="Offline demo driver.") for i in ids])
+        elif schema.__name__ == "MonitorScores":
+            from equitydesk.schemas import MonitorScore
+            rows = re.findall(r'^\[(M\d+)\][^\n]*?: "([^"\n]*)"', text, re.M)
+            obj = schema(items=[MonitorScore(id=i, score=5, category="other", tickers=[], title=t, rumor=False,
+                                             why="Offline demo score.") for i, t in rows])
+        elif schema.__name__ == "MonitorOverview":
+            from equitydesk.schemas import OverviewPoint
+            ids = re.findall(r"^\[(M\d+)\]", text, re.M)
+            obj = schema(macro=[OverviewPoint(text="Offline demo overview of the scored items.", ids=ids[:2])],
+                         tickers=[], watch_next=[])
         elif schema is DebateTurn:
             bull = "bull" in system.split("\n", 1)[0]
             pts = self._points(facts, 2, offset=0 if bull else 2)
@@ -374,7 +384,7 @@ def is_transient(e: BaseException) -> bool:
 
 def is_fatal(e: BaseException) -> bool:
     """Bad key, no access to the model, unknown model: every further call would fail the same way."""
-    return type(e).__name__ in FATAL_NAMES or _status(e) in (401, 403, 404)
+    return type(e).__name__ in FATAL_NAMES or _status(e) in (401, 403, 404) or type(e).__name__ == "NotLoggedIn"
 
 
 def _as_records(messages: list[BaseMessage]) -> list[dict]:
@@ -386,7 +396,12 @@ BackendFactory = Callable[[ModelCfg], Backend]
 
 
 def default_backend_factory(cfg: ModelCfg) -> Backend:
-    return ScriptedBackend() if cfg.provider == "scripted" else LangChainBackend(cfg)
+    if cfg.provider == "scripted":
+        return ScriptedBackend()
+    if cfg.provider == "claude_code":
+        from equitydesk.harness.claude_code import ClaudeCodeBackend
+        return ClaudeCodeBackend(cfg)
+    return LangChainBackend(cfg)
 
 
 class LLM:
@@ -445,7 +460,7 @@ class LLM:
                                       f"({type(e).__name__}): check the API key and model name. {e}"[:600]) from e
                 raise ModelError(f"{node}: model call failed after {attempt} attempt(s): {type(e).__name__}: {e}") from e
             cost = cost_usd(usage.model or cfg.name, usage.input_tokens, usage.output_tokens, usage.cache_read_tokens)
-            if usage.search_calls and usage.model != "scripted":      # the offline model's searches are free
+            if usage.search_calls and usage.model != "scripted" and not usage.model.startswith("claude-code"):  # free
                 per_call = tool_price("web_search")
                 cost = None if cost is None or per_call is None else cost + usage.search_calls * per_call
             self.meter.add(usage, cost)

@@ -33,7 +33,7 @@ with st.sidebar:
 
 pages = [
     st.Page("views/research.py", title="Research", icon=":material/analytics:", default=True),
-    st.Page("views/news.py", title="News", icon=":material/newspaper:"),
+    st.Page("views/monitor.py", title="Monitor", icon=":material/monitor_heart:", url_path="monitor"),
     st.Page("views/watchlist.py", title="Watchlist", icon=":material/list_alt:"),
     st.Page("views/track_record.py", title="Track record", icon=":material/fact_check:"),
     st.Page("views/memory.py", title="Memory & profile", icon=":material/psychology:"),

@@ -279,3 +279,53 @@ def page_header(title: str, subtitle: str = "") -> None:
 
 def section(label: str) -> None:
     html_block(f'<div class="ed-section">{esc(label)}</div>')
+
+
+# -- market monitor ----------------------------------------------------------------------------------
+
+def sparkline(values: list[float], up: bool | None = None, width: int = 150, height: int = 34) -> str:
+    """A tiny inline SVG line with the opening level dashed, coloured by the day's direction."""
+    v = [x for x in values or [] if x is not None]
+    if len(v) < 2:
+        return ""
+    lo, hi = min(v), max(v)
+    span = (hi - lo) or 1.0
+    pts = " ".join(f"{i * width / (len(v) - 1):.1f},{height - 3 - (x - lo) / span * (height - 6):.1f}"
+                   for i, x in enumerate(v))
+    color = "#15803d" if (up if up is not None else v[-1] >= v[0]) else "#dc2626"
+    y0 = height - 3 - (v[0] - lo) / span * (height - 6)
+    return (f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}">'
+            f'<line x1="0" y1="{y0:.1f}" x2="{width}" y2="{y0:.1f}" stroke="#cbd5e1" stroke-dasharray="3,3"/>'
+            f'<polyline fill="none" stroke="{color}" stroke-width="1.6" points="{pts}"/></svg>')
+
+
+def score_badge(score: int | None) -> str:
+    s = score if score is not None else 0
+    bg, fg = (("#dc2626", "#fff") if s >= 9 else ("#f97316", "#fff") if s >= 8 else ("#facc15", "#422006") if s >= 7
+              else ("#94a3b8", "#fff") if s >= 5 else ("#e2e8f0", "#475569"))
+    label = str(score) if score is not None else "…"
+    return (f'<span style="display:inline-block;min-width:30px;text-align:center;padding:4px 0;border-radius:7px;'
+            f'background:{bg};color:{fg};font-weight:800;font-size:.95rem">{label}</span>')
+
+
+def ago_text(iso: str | None, zh: bool = True) -> str:
+    from datetime import datetime, timezone
+    if not iso:
+        return ""
+    try:
+        s = (datetime.now(timezone.utc) - datetime.fromisoformat(iso.replace("Z", "+00:00"))).total_seconds()
+    except ValueError:
+        return ""
+    for limit, div, z, e in ((60, 1, "秒前", "s ago"), (3600, 60, "分钟前", "min ago"), (86400, 3600, "小时前", "h ago"),
+                             (1e12, 86400, "天前", "d ago")):
+        if s < limit:
+            n = int(max(s, 0) // div)
+            return f"{n} {z}" if zh else f"{n} {e}"
+    return ""
+
+
+def bull_bear_bar(bull: int, bear: int, width: int = 90) -> str:
+    tot = (bull + bear) or 1
+    g = int(width * bull / tot)
+    return (f'<span style="display:inline-block;vertical-align:middle;width:{width}px;height:7px;border-radius:4px;'
+            f'background:linear-gradient(90deg,#16a34a {g}px,#ef4444 {g}px)"></span>')

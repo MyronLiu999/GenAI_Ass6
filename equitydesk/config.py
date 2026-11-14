@@ -11,11 +11,11 @@ import yaml
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parent.parent
-ROLES = ("analyst", "debate", "pm", "qa", "research")
+ROLES = ("analyst", "debate", "pm", "qa", "research", "monitor")
 
 
 class ModelCfg(BaseModel):
-    provider: Literal["openai", "anthropic", "scripted"] = "openai"
+    provider: Literal["openai", "anthropic", "scripted", "claude_code"] = "openai"
     name: str = "gpt-4o"
     temperature: float | None = 0.2     # null for models that reject it (reasoning models)
     max_tokens: int = 2500
@@ -67,6 +67,34 @@ class ResearchCfg(BaseModel):
     max_drivers: int = Field(10, ge=1, le=20)
 
 
+class NotifyCfg(BaseModel):
+    desktop: bool = True                     # Windows toast notifications on this machine
+    ntfy_topic: str = ""                     # optional phone push via ntfy.sh: subscribe to this topic in the app
+
+
+class MonitorCfg(BaseModel):
+    """The market monitor (equitydesk/monitor): a background process that collects, scores and pushes news."""
+    interval_s: int = Field(60, ge=15, le=3600)
+    engine: Literal["openai", "claude_code"] = "openai"   # claude_code: the logged-in Claude Code CLI, no API cost
+    claude_models: dict[str, str] = {"score": "haiku", "overview": "sonnet", "report": "sonnet"}
+    language: str = "Chinese"                # titles, overview and reports are written in this language
+    push_min_score: int = Field(8, ge=1, le=10)
+    push_holding_min_score: int = Field(7, ge=1, le=10)   # lower bar for news about a stock you hold
+    max_pushes_per_hour: int = Field(8, ge=0, le=100)
+    report_min_score: int = Field(8, ge=1, le=10)
+    max_reports_per_day: int = Field(6, ge=0, le=50)
+    daily_cost_ceiling_usd: float = Field(2.0, ge=0)
+    overview_every_min: int = Field(120, ge=10)
+    quotes_every_min: int = Field(5, ge=1)
+    social_every_min: int = Field(15, ge=5)
+    predictions_every_min: int = Field(15, ge=5)
+    keep_days: int = Field(14, ge=1)
+    sources: dict[str, bool] = {}            # per-source switches, e.g. {wscn: false}; default all on
+    polymarket_queries: list[str] = ["Fed decision", "recession", "tariffs"]
+    kalshi_series: list[str] = ["KXFEDDECISION"]
+    notify: NotifyCfg = NotifyCfg()
+
+
 class PathsCfg(BaseModel):
     data_dir: str = "data"
 
@@ -79,6 +107,7 @@ class Settings(BaseModel):
     grounding: GroundingCfg = GroundingCfg()
     data: DataCfg = DataCfg()
     research: ResearchCfg = ResearchCfg()
+    monitor: MonitorCfg = MonitorCfg()
     paths: PathsCfg = PathsCfg()
 
     # -- derived ---------------------------------------------------------------------------------
@@ -115,6 +144,10 @@ class Settings(BaseModel):
     @property
     def store_path(self) -> Path:
         return self.data_dir / "desk.db"
+
+    @property
+    def monitor_path(self) -> Path:
+        return self.data_dir / "monitor.db"
 
     @property
     def checkpoint_path(self) -> Path:

@@ -164,7 +164,7 @@ def test_thin_history_degrades(settings):
 
 
 def test_action_text_survives_pandas_nan():
-    """The News page passes actions through a DataFrame, which turns a missing prior target into NaN."""
+    """Actions passed through a DataFrame turn a missing prior target into NaN."""
     import pandas as pd
     from equitydesk.tools.evidence import _action_text
     rec = pd.DataFrame([{"firm": "X", "action": "up", "from": "Hold", "to": "Buy", "pt": 425.0, "prior_pt": None},

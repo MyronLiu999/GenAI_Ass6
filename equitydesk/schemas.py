@@ -158,3 +158,39 @@ class Decision(BaseModel):
 class QAAnswer(BaseModel):
     answer: str
     evidence: list[str] = Field(default_factory=list)
+
+
+# -- market monitor --------------------------------------------------------------------------------
+
+MonitorCategory = Literal["macro", "policy", "geopolitics", "company", "industry", "market", "other"]
+
+
+class MonitorScore(BaseModel):
+    id: str = Field(description="The item's id, e.g. 'M3'.")
+    score: int = Field(ge=1, le=10, description="Importance for an investor holding the watchlist (rubric in the prompt).")
+    category: MonitorCategory
+    tickers: list[str] = Field(default_factory=list, description="Watchlist tickers it could move; only from the list.")
+    title: str = Field(description="The headline rewritten in the target language: faithful, short, no added claims.")
+    rumor: bool = Field(description="True if the item itself reports unconfirmed information (reportedly, sources "
+                                    "say, people familiar, rumour, 据传, 知情人士).")
+    why: str = Field(default="", description="One short phrase: why this score.")
+
+
+class MonitorScores(BaseModel):
+    items: list[MonitorScore]
+
+
+class OverviewPoint(BaseModel):
+    text: str = Field(description="One bullet, in the target language, stating what happened and what it means.")
+    ids: list[str] = Field(description="The item ids (M...) this bullet rests on. Required.")
+
+
+class TickerPoints(BaseModel):
+    ticker: str
+    points: list[OverviewPoint]
+
+
+class MonitorOverview(BaseModel):
+    macro: list[OverviewPoint] = Field(description="Three to six bullets on macro, policy and geopolitics.")
+    tickers: list[TickerPoints] = Field(default_factory=list, description="For watchlist stocks with news only.")
+    watch_next: list[OverviewPoint] = Field(default_factory=list, description="Up to three things to watch next.")

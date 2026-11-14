@@ -325,7 +325,7 @@ with tabs[3]:
         rows.append(ui.news_row(f.as_of, f.label, f.url, f"{ui.esc(f.value)} · {ui.esc(h.get('why', ''))} "
                                 + ui.cite_tag(f.id).strip(), chips))
     ui.html_block('<div class="ed-card">' + ("".join(rows) or "<p class='ed-muted'>No headlines.</p>") + "</div>")
-    st.caption("Track headlines across your whole watchlist on the News page.")
+    st.caption("Follow headlines across your whole watchlist, scored and pushed around the clock, on the Monitor page.")
 
 with tabs[4]:
     try:
